@@ -9,9 +9,9 @@ a simple api for logging events
 - [ ] database backups?
 - [ ] auto database setup & migrations
 - [ ] update script
-- [ ] simple websocket frontend fro incoming events
+- [ ] simple websocket frontend for incoming events
 - [ ] event pushers
-  - [ ] browsed to webpage
+  - [x] browsed to webpage
   - [ ] whoop
   - [ ] garmin
   - [ ] ...
