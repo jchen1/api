@@ -2,8 +2,6 @@
 
 CREATE USER postgres;
 
-GRANT ALL PRIVILEGES ON ALL TABLES ON DATABASE api TO postgres;
-
 
 CREATE TYPE event_data_type AS ENUM ('int', 'bigint', 'real', 'text', 'json');
 

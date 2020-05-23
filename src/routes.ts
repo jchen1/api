@@ -23,6 +23,12 @@ router
     }
 
     const { source, type, data } = body.value;
+    if (!source) {
+      response.status = 400;
+      response.body = "missing data";
+      return;
+    }
+
     const { major, minor } = source;
 
     if (!major || !minor || !type || !data) {
