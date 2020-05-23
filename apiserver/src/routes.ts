@@ -22,7 +22,7 @@ router
       return;
     }
 
-    const { source, type, data } = body.value;
+    const { source, event, type, data } = body.value;
     if (!source) {
       response.status = 400;
       response.body = "missing data";
@@ -31,7 +31,7 @@ router
 
     const { major, minor } = source;
 
-    if (!major || !minor || !type || !data) {
+    if (!major || !minor || !type || !data || !event) {
       response.status = 400;
       response.body = "missing data";
       return;
@@ -45,13 +45,14 @@ router
 
     const dataField = `data_${type}`;
     await db.query(
-      `INSERT INTO events (ts, source_major, source_minor, type, ${dataField}) VALUES ($1, $2, $3, $4, $5)`,
+      `INSERT INTO events (ts, event, source_major, source_minor, type, ${dataField}) VALUES ($1, $2, $3, $4, $5)`,
       // support unix timestamps & js timestamps
       body.value.ts
         ? new Date(
             body.value.ts > 9999999999 ? body.value.ts : body.value.ts * 1000
           )
         : new Date(),
+      event,
       major,
       minor,
       type,
