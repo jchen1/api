@@ -16,7 +16,17 @@ const errorHandler: Middleware = async ({ response }, next) => {
 };
 
 const notFound: Middleware = ({ response }) => {
+  response.status = 404;
   response.body = "Not found";
+};
+
+const logger: Middleware = async ({ request, response }, next) => {
+  await next();
+  console.log(
+    `${new Date().toString()}: ${request.method} ${request.url} - ${
+      response.status
+    }`
+  );
 };
 
 const authMiddleware: Middleware = ({ request, response }, next) => {
@@ -37,13 +47,14 @@ const authMiddleware: Middleware = ({ request, response }, next) => {
     return;
   }
 
-  next();
+  return next();
 };
 
 await db.connect();
 
 app.use(errorHandler);
 app.use(authMiddleware);
+app.use(logger);
 app.use(router.routes());
 app.use(router.allowedMethods());
 app.use(notFound);

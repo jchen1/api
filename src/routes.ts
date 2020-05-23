@@ -58,7 +58,9 @@ router
       data
     );
 
+    response.status = 200;
     response.body = "ok";
+    return;
   });
 
 export default router;
