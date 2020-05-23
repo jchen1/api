@@ -60,7 +60,14 @@ app.use(router.allowedMethods());
 app.use(notFound);
 
 const port = parseInt(config().APP_PORT || "9000");
-const server = app.listen({ port });
+const httpsOptions = config().ENABLE_HTTPS
+  ? {
+      secure: true,
+      certFile: config().HTTPS_CERT_FILE,
+      keyFile: config().HTTPS_KEY_FILE,
+    }
+  : {};
+const server = app.listen({ port, ...httpsOptions });
 console.log(`Webserver started on port ${port}`);
 
 await server;

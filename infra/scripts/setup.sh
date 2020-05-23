@@ -3,7 +3,8 @@
 set -xeo pipefail
 
 # upgrade & install packages, install postgres (sets up a postgres service)
-apt-get update && apt-get upgrade --force-yes && apt-get -y install postgresql postgresql-contrib unzip
+apt-get update && apt-get install software-properties-common && apt-add-repository universe
+apt-get update && apt-get upgrade --force-yes && apt-get -y install certbot postgresql postgresql-contrib unzip
 
 # install deno
 curl -fsSL https://deno.land/x/install/install.sh | sh
