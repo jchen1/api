@@ -33,8 +33,8 @@ Documentation=https://github.com/jchen1/api
 
 [Service]
 Environment=HOME=/root
-WorkingDirectory=/root/api/apiserver
-ExecStart=/root/.deno/bin/deno run --allow-read --allow-env --allow-net src/index.ts
+WorkingDirectory=/root/api
+ExecStart=/root/.deno/bin/deno run --allow-read --allow-env --allow-net apiserver/src/index.ts
 Restart=always
 LimitNOFILE=1048576
 LimitNPROC=1048576

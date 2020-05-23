@@ -1,3 +1,4 @@
+import { oakCors } from "https://deno.land/x/cors/mod.ts";
 import { Router } from "https://deno.land/x/oak/mod.ts";
 
 import db from "./db/database.ts";
@@ -8,7 +9,8 @@ router
   .get("/", ({ response }) => {
     response.body = "hello world!";
   })
-  .post("/", async ({ request, response }) => {
+  .options("/", oakCors())
+  .post("/", oakCors(), async ({ request, response }) => {
     if (!request.hasBody) {
       response.status = 400;
       response.body = "missing body";
