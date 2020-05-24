@@ -1,17 +1,6 @@
 import db from "./db/database.ts";
-
-type EventSource = {
-  major: string;
-  minor: string;
-};
-
-export enum EventType {
-  Int = "int",
-  BigInt = "bigint",
-  Real = "real",
-  Text = "text",
-  Json = "json",
-}
+import wss from "./websocket.ts";
+import { EventSource, EventType } from "./types.ts";
 
 export async function sendEvent(
   event: string,
@@ -22,7 +11,7 @@ export async function sendEvent(
 ) {
   const dataField = `data_${type}`;
 
-  return await db.query(
+  await db.query(
     `INSERT INTO events (ts, event, source_major, source_minor, type, ${dataField}) VALUES ($1, $2, $3, $4, $5, $6)`,
     // support unix timestamps & js timestamps
     time,
@@ -32,4 +21,6 @@ export async function sendEvent(
     type,
     data
   );
+
+  return await wss.sendEvent(event, source, type, data, time);
 }

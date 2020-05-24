@@ -1,6 +1,7 @@
 import { Middleware, Router } from "https://deno.land/x/oak/mod.ts";
 
-import { EventType, sendEvent } from "./event.ts";
+import { sendEvent } from "./event.ts";
+import { EventType } from "./types.ts";
 
 export const postEvent: Middleware = async ({ request, response }) => {
   if (!request.hasBody) {

@@ -2,7 +2,8 @@ import { config } from "https://deno.land/x/dotenv/mod.ts";
 import * as log from "https://deno.land/std/log/mod.ts";
 
 import db from "../db/database.ts";
-import { EventType, sendEvent } from "../event.ts";
+import { sendEvent } from "../event.ts";
+import { EventType } from "../types.ts";
 
 type Token = {
   user_id: number;

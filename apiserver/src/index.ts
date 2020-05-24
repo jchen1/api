@@ -1,5 +1,5 @@
 import { config } from "https://deno.land/x/dotenv/mod.ts";
-import { Application, Middleware } from "https://deno.land/x/oak/mod.ts";
+import { Application, Middleware, send } from "https://deno.land/x/oak/mod.ts";
 import * as log from "https://deno.land/std/log/mod.ts";
 
 import cron from "./cron.ts";
@@ -38,6 +38,12 @@ app.use(errorHandler);
 app.use(logger);
 app.use(router.routes());
 app.use(router.allowedMethods());
+app.use(async context => {
+  await send(context, context.request.url.pathname, {
+    root: config().NEXTJS_EXPORT_DIR,
+    index: "index.html",
+  });
+});
 app.use(notFound);
 
 const port = parseInt(config().APP_PORT || "9000");

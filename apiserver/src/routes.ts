@@ -7,11 +7,6 @@ import { authMiddleware } from "./middlewares.ts";
 
 const router = new Router();
 
-router
-  .get("/", ({ response }) => {
-    response.body = "hello world!";
-  })
-  .options("/", oakCors())
-  .post("/", oakCors(), authMiddleware, postEvent);
+router.options("/", oakCors()).post("/", oakCors(), authMiddleware, postEvent);
 
 export default router;
