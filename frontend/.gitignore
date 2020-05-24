@@ -10,6 +10,7 @@
 
 # next.js
 /.next/
+/out/_next/static/webpack/
 
 # production
 /build
