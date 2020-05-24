@@ -1,6 +1,7 @@
 import { Cron } from "https://deno.land/x/cron/cron.ts";
 import * as log from "https://deno.land/std/log/mod.ts";
 
+import awair from "./providers/awair.ts";
 import whoop from "./providers/whoop.ts";
 
 type Handler = {
@@ -18,6 +19,11 @@ const jobs: Record<string, Handler> = {
     },
     init: async () => await whoop.init(),
   },
+  awair: {
+    schedule: "* * * * *",
+    handler: async () => await awair.ingest(),
+    init: async () => await awair.init(),
+  },
 };
 
 const cron = new Cron();
@@ -34,9 +40,7 @@ for (const name in jobs) {
         `${end}: Finished job ${name} in ${end.getTime() - start.getTime()}ms`
       );
     } catch (err) {
-      log.error(
-        `${new Date().toString()}: Job ${name} failed with error ${err}!`
-      );
+      log.error(`${new Date().toString()}: Job ${name} failed!\n${err.stack}`);
     }
   });
 }

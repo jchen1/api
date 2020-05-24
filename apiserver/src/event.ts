@@ -1,6 +1,54 @@
 import db from "./db/database.ts";
 import wss from "./websocket.ts";
-import { EventSource, EventType } from "./types.ts";
+import { Event, EventSource, EventType } from "./types.ts";
+
+export async function sendEvents(events: Event[]) {
+  if (events.length === 0) {
+    return;
+  }
+
+  const typedEvents = events.map(event => {
+    const data = event.data;
+    delete event.data;
+
+    return {
+      ...event,
+      data_json: event.type === EventType.Json ? data : null,
+      data_int: event.type === EventType.Int ? data : null,
+      data_bigint: event.type === EventType.BigInt ? data : null,
+      data_real: event.type === EventType.Real ? data : null,
+      data_text: event.type === EventType.Text ? data : null,
+    };
+  });
+
+  const query =
+    `INSERT INTO events (ts, event, source_major, source_minor, type, data_int, data_bigint, data_real, data_text, data_json) VALUES` +
+    typedEvents
+      .map((_, idx) => {
+        const start = 1 + idx * 10;
+        return (
+          "(" + [...Array(10).keys()].map(n => `$${start + n}`).join(",") + ")"
+        );
+      })
+      .join(",") +
+    " ON CONFLICT DO NOTHING";
+
+  await db.query({
+    text: query,
+    args: typedEvents.flatMap(e => [
+      e.time,
+      e.event,
+      e.source.major,
+      e.source.minor,
+      e.type,
+      e.data_int,
+      e.data_bigint,
+      e.data_real,
+      e.data_text,
+      e.data_json,
+    ]),
+  });
+}
 
 export async function sendEvent(
   event: string,
@@ -9,18 +57,13 @@ export async function sendEvent(
   data: any,
   time = new Date()
 ) {
-  const dataField = `data_${type}`;
-
-  await db.query(
-    `INSERT INTO events (ts, event, source_major, source_minor, type, ${dataField}) VALUES ($1, $2, $3, $4, $5, $6)`,
-    // support unix timestamps & js timestamps
-    time,
-    event,
-    source.major,
-    source.minor,
-    type,
-    data
-  );
-
-  return await wss.sendEvent(event, source, type, data, time);
+  return await sendEvents([
+    {
+      event,
+      source,
+      type,
+      data,
+      time,
+    },
+  ]);
 }

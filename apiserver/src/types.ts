@@ -10,3 +10,11 @@ export enum EventType {
   Text = "text",
   Json = "json",
 }
+
+export type Event = {
+  event: string;
+  source: EventSource;
+  type: EventType;
+  data: any;
+  time: Date;
+};

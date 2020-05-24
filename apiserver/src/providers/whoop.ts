@@ -2,7 +2,7 @@ import { config } from "https://deno.land/x/dotenv/mod.ts";
 import * as log from "https://deno.land/std/log/mod.ts";
 
 import db from "../db/database.ts";
-import { sendEvent } from "../event.ts";
+import { sendEvents } from "../event.ts";
 import { EventType } from "../types.ts";
 
 type Token = {
@@ -104,17 +104,17 @@ class Whoop {
         : new Date(now - 1000 * 60 * 60 * 24);
 
     const { values } = await getHR(this.token, start);
-    for (const metric of values) {
-      await sendEvent(
-        "hr",
-        { major: "whoop", minor: "api" },
-        EventType.Int,
-        metric.data,
-        new Date(metric.time)
-      );
-    }
+    const events = values.map((metric: any) => ({
+      event: "hr",
+      source: { major: "whoop", minor: "api" },
+      type: EventType.Int,
+      data: metric.data,
+      time: new Date(metric.time),
+    }));
 
-    log.info(`Ingested ${values.length} events.`);
+    await sendEvents(events);
+
+    log.info(`whoop: ingested ${values.length} events`);
   }
 }
 
