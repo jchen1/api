@@ -1,6 +1,8 @@
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 import { Application, Middleware } from "https://deno.land/x/oak/mod.ts";
+import * as log from "https://deno.land/std/log/mod.ts";
 
+import cron from "./cron.ts";
 import db from "./db/database.ts";
 import router from "./routes.ts";
 
@@ -10,6 +12,7 @@ const errorHandler: Middleware = async ({ response }, next) => {
   try {
     await next();
   } catch (err) {
+    log.error(err);
     response.status = 500;
     response.body = { msg: err.message };
   }
@@ -22,7 +25,7 @@ const notFound: Middleware = ({ response }) => {
 
 const logger: Middleware = async ({ request, response }, next) => {
   await next();
-  console.log(
+  log.info(
     `${new Date().toString()}: ${request.method} ${request.url} - ${
       response.status
     }`
@@ -46,6 +49,9 @@ const httpsOptions = config().ENABLE_HTTPS
     }
   : {};
 const server = app.listen({ port, ...httpsOptions });
-console.log(`Webserver started on port ${port}`);
+log.info(`Webserver started on port ${port}`);
+
+cron.start();
+log.info("Cron workers started");
 
 await server;

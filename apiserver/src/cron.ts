@@ -1,0 +1,51 @@
+import { Cron } from "https://deno.land/x/cron/cron.ts";
+import * as log from "https://deno.land/std/log/mod.ts";
+
+import whoop from "./providers/whoop.ts";
+
+type Handler = {
+  schedule: string;
+  handler: () => void | Promise<void>;
+  init: () => void | Promise<void>;
+};
+
+const jobs: Record<string, Handler> = {
+  whoop: {
+    schedule: "* * * * *",
+    handler: async () => {
+      await whoop.ingest();
+    },
+    init: async () => await whoop.init(),
+  },
+};
+
+const cron = new Cron();
+
+for (const name in jobs) {
+  const { schedule, handler } = jobs[name];
+  cron.add(schedule, () => {
+    log.info(`${new Date().toString()}: Starting job ${name}.`);
+    try {
+      handler();
+      log.info(`${new Date().toString()}: Finished job ${name}!`);
+    } catch (err) {
+      log.error(
+        `${new Date().toString()}: Job ${name} failed with error ${err}!`
+      );
+    }
+  });
+}
+
+async function init() {
+  for (const name in jobs) {
+    const { init } = jobs[name];
+    await init();
+  }
+}
+
+export async function start() {
+  await init();
+  cron.start();
+}
+
+export default { start };
