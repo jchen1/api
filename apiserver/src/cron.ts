@@ -11,6 +11,7 @@ type Handler = {
 
 const jobs: Record<string, Handler> = {
   whoop: {
+    // todo: fork cron to support */5 syntax
     schedule: "* * * * *",
     handler: async () => {
       await whoop.ingest();

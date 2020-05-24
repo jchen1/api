@@ -2,6 +2,7 @@ import { config } from "https://deno.land/x/dotenv/mod.ts";
 import * as log from "https://deno.land/std/log/mod.ts";
 
 import db from "../db/database.ts";
+import { EventType, sendEvent } from "../event.ts";
 
 type Token = {
   user_id: number;
@@ -103,23 +104,12 @@ class Whoop {
 
     const { values } = await getHR(this.token, start);
     for (const metric of values) {
-      const event = {
-        ts: new Date(metric.time),
-        event: "hr",
-        source_major: "whoop",
-        source_minor: "api",
-        type: "int",
-        data_int: metric.data,
-      };
-
-      await db.query(
-        `INSERT INTO events (ts, event, source_major, source_minor, type, data_int) VALUES ($1, $2, $3, $4, $5, $6)`,
-        event.ts,
-        event.event,
-        event.source_major,
-        event.source_minor,
-        event.type,
-        event.data_int
+      await sendEvent(
+        "hr",
+        { major: "whoop", minor: "api" },
+        EventType.Int,
+        metric.data,
+        new Date(metric.time)
       );
     }
 
