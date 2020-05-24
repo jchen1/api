@@ -65,11 +65,11 @@ class WSSServer {
     const promises = Object.values(this.connections).map(ws =>
       ws.send(JSON.stringify(message))
     );
-    await Promise.all(promises);
+    return Promise.all(promises);
   }
 
   async sendEvents(events: Event[]) {
-    await Promise.all(
+    return Promise.all(
       events.map(e => sendEvent(e.event, e.source, e.type, e.data, e.time))
     );
   }
