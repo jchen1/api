@@ -48,6 +48,8 @@ export async function sendEvents(events: Event[]) {
       e.data_json,
     ]),
   });
+
+  await wss.sendEvents(events);
 }
 
 export async function sendEvent(

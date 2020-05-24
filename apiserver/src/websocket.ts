@@ -5,7 +5,8 @@ import {
   WebSocket,
   WebSocketServer,
 } from "https://deno.land/x/websocket/mod.ts";
-import { EventSource, EventType } from "./types.ts";
+import { Event, EventSource, EventType } from "./types.ts";
+import { sendEvents, sendEvent } from "./event.ts";
 
 const filters = {
   events: ["visited_url", "switched_tab"],
@@ -65,6 +66,12 @@ class WSSServer {
       ws.send(JSON.stringify(message))
     );
     await Promise.all(promises);
+  }
+
+  async sendEvents(events: Event[]) {
+    await Promise.all(
+      events.map(e => sendEvent(e.event, e.source, e.type, e.data, e.time))
+    );
   }
 }
 
