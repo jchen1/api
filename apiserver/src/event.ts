@@ -34,7 +34,7 @@ export async function sendEvents(events: Event[]) {
     " ON CONFLICT DO NOTHING";
 
   // this could fail and that's ok!
-  // wss.sendEvents(events);
+  wss.sendEvents(events);
 
   return await db.query({
     text: query,

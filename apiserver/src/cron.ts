@@ -16,18 +16,16 @@ const jobs: Record<string, Handler> = {
     schedule: "* * * * *",
     handler: async () => {
       await whoop.ingest();
-      await awair.ingest();
     },
     init: async () => {
       await whoop.init();
-      await awair.init();
     },
   },
-  // awair: {
-  //   schedule: "* * * * *",
-  //   handler: async () => await awair.ingest(),
-  //   init: async () => await awair.init(),
-  // },
+  awair: {
+    schedule: "* * * * *",
+    handler: async () => await awair.ingest(),
+    init: async () => await awair.init(),
+  },
 };
 
 const cron = new Cron();

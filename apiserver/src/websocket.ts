@@ -70,7 +70,9 @@ class WSSServer {
 
   async sendEvents(events: Event[]) {
     return Promise.all(
-      events.map(e => sendEvent(e.event, e.source, e.type, e.data, e.time))
+      events
+        .filter(e => e.source.major !== "awair")
+        .map(e => sendEvent(e.event, e.source, e.type, e.data, e.time))
     );
   }
 }
