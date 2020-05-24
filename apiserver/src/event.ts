@@ -33,7 +33,10 @@ export async function sendEvents(events: Event[]) {
       .join(",") +
     " ON CONFLICT DO NOTHING";
 
-  await db.query({
+  // this could fail and that's ok!
+  wss.sendEvents(events);
+
+  return await db.query({
     text: query,
     args: typedEvents.flatMap(e => [
       e.time,
@@ -48,8 +51,6 @@ export async function sendEvents(events: Event[]) {
       e.data_json,
     ]),
   });
-
-  await wss.sendEvents(events);
 }
 
 export async function sendEvent(
