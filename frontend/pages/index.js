@@ -65,9 +65,8 @@ export default function Home() {
 
   useEffect(() => {
     const ws = new WebSocket(
-      "wss://api.jeffchen.dev:444" ||
-        process.env.NEXT_PUBLIC_WS_URL ||
-        "ws://localhost:9001"
+      // "wss://api.jeffchen.dev:444" ||
+      process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9001"
     );
 
     ws.onmessage = event => {

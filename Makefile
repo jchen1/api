@@ -20,7 +20,7 @@ start: start-db
 	make -j2 start-frontend start-backend
 
 build:
-	NEXT_PUBLIC_WS_URL=wss://api.jeffchen.dev:444 yarn --cwd frontend export
+	NEXT_PUBLIC_WS_URL=wss://api.jeffchen.dev:444 NEXT_PUBLIC_BASE_URL=https://www.jeffchen.dev yarn --cwd frontend export
 
 prod: build
 	git pull && systemctl daemon-reload && systemctl restart apiserver.service && journalctl -u apiserver.service -f

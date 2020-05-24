@@ -1,7 +1,6 @@
 import React from "react";
-import styled from "styled-components";
 
-const BASE_URL = process.env.BASE_URL || "localhost:4000";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "localhost:4000";
 
 export default function Header() {
   return (
