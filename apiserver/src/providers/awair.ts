@@ -79,7 +79,7 @@ class Awair {
     }
 
     const { rows } = await db.query(
-      `SELECT source_minor, MAX(ts) FROM events WHERE source_major=$1 AND source_minor = ANY($2::text[]) GROUP BY source_minor`,
+      `SELECT source_minor, MAX(ts) FROM events WHERE source_major=$1 AND source_minor = ANY($2::text[]) GROUP BY source_minor;`,
       "awair",
       this.devices.map(deviceId)
     );

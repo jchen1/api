@@ -32,7 +32,7 @@ export async function sendEvents(events: Event[]) {
         );
       })
       .join(",") +
-    " ON CONFLICT DO NOTHING";
+    " ON CONFLICT DO NOTHING;";
 
   const promise = db.query({
     text: query,
