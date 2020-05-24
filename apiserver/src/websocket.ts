@@ -42,7 +42,7 @@ class WSSServer {
       });
     });
 
-    log.info(`Started wss server on port ${port}`);
+    log.info(`Started wss server on port ${wsPort}`);
   }
 
   async sendEvent(
