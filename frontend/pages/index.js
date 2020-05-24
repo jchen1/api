@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
 import Header from "./header";
+import Event from "./event";
+import Widget from "./widget";
 
 const Container = styled.div`
   min-height: 100vh;
@@ -32,25 +34,6 @@ const Title = styled.h1`
   margin: 0 0 1rem 0;
 `;
 
-const EventCard = styled.div`
-  padding: 0.5rem 0.5rem 0.5rem 0;
-  text-align: left;
-  text-decoration: none;
-
-  h3,
-  p {
-    margin: 0;
-  }
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  p,
-  em {
-    font-size: 0.8rem;
-  }
-`;
-
 const FeedContainer = styled.div`
   padding: 0 2rem;
   max-height: 60rem;
@@ -68,28 +51,6 @@ const WidgetContainer = styled.div`
   width: 100%;
   overflow: hidden;
 `;
-
-function prettifyData(data) {
-  return isNaN(data) ? data : +data.toFixed(2);
-}
-
-function Event({ event }) {
-  const title =
-    event.data === "hidden"
-      ? event.event
-      : `${event.event} - ${prettifyData(event.data)}`;
-  return (
-    <EventCard
-      key={`${event.event}.${event.source.major}.${event.source.minor}.${event.time}`}
-    >
-      <h3>{title}</h3>
-      <p>{event.time}</p>
-      <em>
-        {event.source.major} - {event.source.minor}
-      </em>
-    </EventCard>
-  );
-}
 
 export default function Home() {
   const [events, setEvents] = useState({ all: [] });
@@ -130,26 +91,9 @@ export default function Home() {
     .reverse()
     .map(event => Event({ event }));
 
-  const types = {
-    hr: "Heart Rate (bpm)",
-    awair_score: "Awair Score",
-    co2: "CO2 (ppm)",
-    temp: "Temperature (°F)",
-    voc: "VOC (ppb)",
-    humid: "Humidity (%)",
-  };
-  const miniWidgets = Object.keys(types).map(type => {
-    const lastOfType = events[type]
-      ? events[type][events[type].length - 1]
-      : {};
-
-    return (
-      <>
-        <h2>{types[type]}</h2>
-        <p>{prettifyData(lastOfType.data) || "---"}</p>
-      </>
-    );
-  });
+  const miniWidgets = Object.keys(events).map(type => (
+    <Widget type={type} events={events[type]}></Widget>
+  ));
 
   const widgets = (
     <WidgetContainer>
@@ -157,11 +101,7 @@ export default function Home() {
         <h2>Raw Event Feed</h2>
         <EventContainer>{eventRows}</EventContainer>
       </FeedContainer>
-      <FeedContainer>
-        <h2>Events Received</h2>
-        <p>{events.all.length}</p>
-        {miniWidgets}
-      </FeedContainer>
+      <FeedContainer>{miniWidgets}</FeedContainer>
     </WidgetContainer>
   );
 
