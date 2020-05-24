@@ -37,7 +37,7 @@ await db.connect();
 app.use(errorHandler);
 app.use(logger);
 app.use(router.routes());
-app.use(router.allowedMethods());
+// app.use(router.allowedMethods());
 app.use(async context => {
   await send(context, context.request.url.pathname, {
     root: config().NEXTJS_EXPORT_DIR,
