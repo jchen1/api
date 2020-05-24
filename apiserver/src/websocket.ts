@@ -46,8 +46,6 @@ class WSSServer {
   }
 
   async sendEvents(events: Event[]) {
-    console.log(events.map(e => e.data));
-
     const message = {
       events: events.map(event => ({
         ...event,

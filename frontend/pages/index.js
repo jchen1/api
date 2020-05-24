@@ -47,7 +47,6 @@ const EventContainer = styled.div`
 `;
 
 function Event({ event }) {
-  console.log(event);
   const title =
     event.data === "hidden" ? event.event : `${event.event} - ${event.data}`;
   return (
