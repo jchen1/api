@@ -13,5 +13,11 @@ a simple api for logging events
 - [ ] event pushers
   - [x] browsed to webpage
   - [ ] whoop
+    - [x] hr
+    - [ ] rest of data...
   - [ ] garmin
+  - [ ] fitbit (weight)
+  - [ ] awair
+  - [ ] wunderground
+  - [ ] roam, when the API exists
   - [ ] ...

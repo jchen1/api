@@ -14,4 +14,4 @@ start: start-db
 	PATH=~/.deno/bin:$$PATH denon run --allow-read --allow-env --allow-net apiserver/src/index.ts
 
 prod:
-	deno run --allow-read --allow-env --allow-net apiserver/src/index.ts
+	git pull && systemctl daemon-reload && systemctl restart apiserver.service && journalctl -u apiserver.service -f
