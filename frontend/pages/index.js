@@ -61,7 +61,7 @@ export default function Home() {
           flex: 1;
           display: flex;
           flex-direction: column;
-          justify-content: center;
+          justify-content: flex-start;
           align-items: center;
         }
 
@@ -101,9 +101,10 @@ export default function Home() {
         }
 
         .title {
-          margin: 0;
+          margin: 0 0 3rem 0;
           line-height: 1.15;
           font-size: 4rem;
+          width: 100%;
         }
 
         .title,
@@ -157,6 +158,7 @@ export default function Home() {
         .card h3 {
           margin: 0 0 1rem 0;
           font-size: 1.5rem;
+          text-align: center;
         }
 
         .card p {
