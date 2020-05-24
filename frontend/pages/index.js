@@ -27,8 +27,8 @@ const Main = styled.main`
 `;
 
 const Title = styled.h1`
-  font-size: 4rem;
-  margin: 0 0 3rem 0;
+  font-size: 3rem;
+  margin: 0 0 1rem 0;
 `;
 
 const EventCard = styled.div`
@@ -47,10 +47,13 @@ const EventContainer = styled.div`
 `;
 
 function Event({ event }) {
+  console.log(event);
   const title =
     event.data === "hidden" ? event.event : `${event.event} - ${event.data}`;
   return (
-    <EventCard key={event.time}>
+    <EventCard
+      key={`${event.event}.${event.source.major}.${event.source.minor}.${event.time}`}
+    >
       <h3>{title}</h3>
       <em>
         {event.source.major} - {event.source.minor}
@@ -71,7 +74,7 @@ export default function Home() {
 
     ws.onmessage = event => {
       const response = JSON.parse(event.data);
-      setEvents([response].concat(events));
+      setEvents(response.events.concat(events));
     };
     ws.onclose = () => ws.close();
 

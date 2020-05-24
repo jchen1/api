@@ -4,18 +4,18 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "localhost:4000";
 
 export default function Header() {
   return (
-    <div class="wrapper-masthead">
-      <div class="container">
-        <header class="masthead clearfix">
-          <a href={`${BASE_URL}/`} class="site-avatar">
+    <div className="wrapper-masthead">
+      <div className="container">
+        <header className="masthead clearfix">
+          <a href={`${BASE_URL}/`} className="site-avatar">
             <img src="https://jeffchen.dev/images/profile.jpg" />
           </a>
 
-          <div class="site-info">
-            <h1 class="site-name">
+          <div className="site-info">
+            <h1 className="site-name">
               <a href={`${BASE_URL}/`}>Jeff Chen</a>
             </h1>
-            <p class="site-description">Engineering & more</p>
+            <p className="site-description">Engineering & more</p>
           </div>
 
           <nav>

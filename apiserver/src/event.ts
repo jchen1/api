@@ -1,3 +1,5 @@
+import * as log from "https://deno.land/std/log/mod.ts";
+
 import db from "./db/database.ts";
 import wss from "./websocket.ts";
 import { Event, EventSource, EventType } from "./types.ts";
@@ -9,7 +11,6 @@ export async function sendEvents(events: Event[]) {
 
   const typedEvents = events.map(event => {
     const data = event.data;
-    delete event.data;
 
     return {
       ...event,
@@ -33,10 +34,7 @@ export async function sendEvents(events: Event[]) {
       .join(",") +
     " ON CONFLICT DO NOTHING";
 
-  // this could fail and that's ok!
-  // wss.sendEvents(events);
-
-  return await db.query({
+  const promise = db.query({
     text: query,
     args: typedEvents.flatMap(e => [
       e.time,
@@ -51,6 +49,23 @@ export async function sendEvents(events: Event[]) {
       e.data_json,
     ]),
   });
+
+  // this could fail and that's ok!
+  wss.sendEvents(events).then(results => {
+    if (results.length > 0) {
+      log.info(
+        `sent ${events.length} events to ${
+          results.length
+        } active websocket connections: ${
+          results.filter(r => r.status === "fulfilled").length
+        } succeeded, ${
+          results.filter(r => r.status === "rejected").length
+        } failed`
+      );
+    }
+  });
+
+  return promise;
 }
 
 export async function sendEvent(

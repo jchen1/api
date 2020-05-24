@@ -5,8 +5,7 @@ import {
   WebSocket,
   WebSocketServer,
 } from "https://deno.land/x/websocket/mod.ts";
-import { Event, EventSource, EventType } from "./types.ts";
-import { sendEvents, sendEvent } from "./event.ts";
+import { Event } from "./types.ts";
 
 const filters = {
   events: ["visited_url", "switched_tab"],
@@ -14,6 +13,7 @@ const filters = {
 };
 
 // todo somehow get SSL enabled...
+// todo gzip
 class WSSServer {
   wss: WebSocketServer;
   connections: Record<number, WebSocket>;
@@ -45,35 +45,24 @@ class WSSServer {
     log.info(`Started wss server on port ${wsPort}`);
   }
 
-  async sendEvent(
-    event: string,
-    source: EventSource,
-    type: EventType,
-    data: any,
-    time: Date
-  ) {
+  async sendEvents(events: Event[]) {
+    console.log(events.map(e => e.data));
+
     const message = {
-      event,
-      source,
-      type,
-      data:
-        filters.events.includes(event) || filters.sources.includes(source.major)
-          ? "hidden"
-          : data,
-      time,
+      events: events.map(event => ({
+        ...event,
+        data:
+          filters.events.includes(event.event) ||
+          filters.sources.includes(event.source.major)
+            ? "hidden"
+            : event.data,
+      })),
     };
+
     const promises = Object.values(this.connections).map(ws =>
       ws.send(JSON.stringify(message))
     );
-    return Promise.all(promises);
-  }
-
-  async sendEvents(events: Event[]) {
-    return Promise.all(
-      events
-        .filter(e => e.source.major !== "awair")
-        .map(e => sendEvent(e.event, e.source, e.type, e.data, e.time))
-    );
+    return Promise.allSettled(promises);
   }
 }
 

@@ -98,6 +98,10 @@ class Whoop {
       "whoop"
     );
 
+    if (rows.length > 0 && !rows[0][0].getTime) {
+      log.warning(`whoop: strange query: ${rows[0]}`);
+    }
+
     const start =
       rows.length > 0
         ? new Date(rows[0][0].getTime() + 1000)
