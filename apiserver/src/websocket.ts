@@ -7,6 +7,8 @@ import {
 } from "https://deno.land/x/websocket/mod.ts";
 import { EventSource, EventType } from "./types.ts";
 
+const filteredEvents = ["visited_url"];
+
 // todo somehow get SSL enabled...
 class WSSServer {
   wss: WebSocketServer;
@@ -50,7 +52,7 @@ class WSSServer {
       event,
       source,
       type,
-      data,
+      data: filteredEvents.includes(event) ? "hidden" : data,
       time,
     };
     const promises = Object.values(this.connections).map(ws =>
