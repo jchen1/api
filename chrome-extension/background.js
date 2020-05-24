@@ -2,11 +2,11 @@
 
 const apiURL = "https://api.jeffchen.dev/";
 
-function visited(url) {
+function sendEvent(url, event) {
   chrome.storage.sync.get({ token: "" }, ({ token }) => {
     if (token !== "" && url !== "") {
       const data = {
-        event: "visited_url",
+        event,
         source: {
           major: "chrome-extension",
           minor: "v0.1",
@@ -26,9 +26,15 @@ function visited(url) {
   });
 }
 
-chrome.tabs.onCreated.addListener(({ url }) => visited(url));
+chrome.tabs.onCreated.addListener(({ url }) => sendEvent(url, "visited_url"));
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.url) {
-    visited(changeInfo.url);
+    sendEvent(changeInfo.url, "visited_url");
   }
+});
+
+chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
+  chrome.tabs.get(tabId, tab => {
+    sendEvent(tab.url, "switched_tab");
+  });
 });
