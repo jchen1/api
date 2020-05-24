@@ -34,30 +34,26 @@ async function getToken(username: string, password: string) {
     });
 }
 
-async function getCycles(token: Token, start: Date, end = new Date()) {
-  return fetch(
-    `https://api-7.whoop.com/users/${
-      token.user_id
-    }/cycles?start=${start.toISOString()}&end=${end.toISOString()}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token.access_token}`,
-      },
-    }
-  ).then(res => res.json());
+async function api(token: Token, url: string) {
+  return fetch(`https://api-7.whoop.com/users/${token.user_id}/${url}`, {
+    headers: {
+      Authorization: `Bearer ${token.access_token}`,
+    },
+  }).then(res => res.json());
 }
 
-async function getHR(token: Token, start: Date, end = new Date(), step = 60) {
-  return fetch(
-    `https://api-7.whoop.com/users/${
-      token.user_id
-    }/metrics/heart_rate?start=${start.toISOString()}&end=${end.toISOString()}&order=t&step=${step}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token.access_token}`,
-      },
-    }
-  ).then(res => res.json());
+async function getCycles(token: Token, start: Date, end = new Date()) {
+  return api(
+    token,
+    `cycles?start=${start.toISOString()}&end=${end.toISOString()}`
+  );
+}
+
+async function getHR(token: Token, start: Date, end = new Date(), step = 6) {
+  return api(
+    token,
+    `metrics/heart_rate?start=${start.toISOString()}&end=${end.toISOString()}&order=t&step=${step}`
+  );
 }
 
 class Whoop {

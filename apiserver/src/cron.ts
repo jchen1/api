@@ -23,11 +23,15 @@ const cron = new Cron();
 
 for (const name in jobs) {
   const { schedule, handler } = jobs[name];
-  cron.add(schedule, () => {
-    log.info(`${new Date().toString()}: Starting job ${name}.`);
+  cron.add(schedule, async () => {
+    const start = new Date();
+    log.info(`${start.toString()}: Starting job ${name}`);
     try {
-      handler();
-      log.info(`${new Date().toString()}: Finished job ${name}!`);
+      await handler();
+      const end = new Date();
+      log.info(
+        `${end}: Finished job ${name} in ${end.getTime() - start.getTime()}ms`
+      );
     } catch (err) {
       log.error(
         `${new Date().toString()}: Job ${name} failed with error ${err}!`
