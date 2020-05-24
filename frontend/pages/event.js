@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-import { prettifyData } from "./util";
+import { prettifyData } from "../lib/util";
 
 const EventCard = styled.div`
   padding: 0.5rem 0.5rem 0.5rem 0;
@@ -23,6 +23,8 @@ const EventCard = styled.div`
 `;
 
 export default function Event({ event }) {
+  if (!event) return null;
+
   const title =
     event.data === "hidden"
       ? event.event

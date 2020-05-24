@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-import { last, prettifyData } from "./util";
+import { last, prettifyData } from "../lib/util";
 
 function TextWidget({ value }) {
   return <p>{value ? prettifyData(value) : "---"}</p>;
