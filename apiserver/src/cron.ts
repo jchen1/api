@@ -22,7 +22,7 @@ const jobs: Record<string, Handler> = {
     },
   },
   awair: {
-    schedule: "* * * * *",
+    schedule: "0 * * * *",
     handler: async () => await awair.ingest(),
     init: async () => await awair.init(),
   },
