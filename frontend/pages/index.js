@@ -34,7 +34,7 @@ const Title = styled.h1`
 
 const FeedContainer = styled.div`
   padding: 0 2rem;
-  max-height: 60rem;
+  max-height: 40rem;
   flex: 1 1 33%;
   @media screen and (max-width: 640px) {
     flex: 1 1 100%;
@@ -65,15 +65,85 @@ const InnerContainer = styled.div`
   }
 `;
 
+const Label = styled.label`
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 5px 0 0 5px;
+  border: 1px solid #d8d8d8;
+  background-color: white;
+  cursor: text;
+
+  input {
+    -webkit-appearance: none;
+    border: none;
+    outline: 0;
+    padding: 0;
+    font-size: 1rem;
+    padding: 0 0.5rem;
+  }
+`;
+
+const Button = styled.button`
+  height: 2.5rem;
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+  background: white;
+  text-align: center;
+  /* text-transform: uppercase; */
+  outline: 0;
+  border: 1px solid #d8d8d8;
+  border-left: 0;
+  border-radius: 0 5px 5px 0;
+
+  &:hover {
+    background-color: #eee;
+  }
+`;
+
+const Form = styled.form`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+function InputContainer({ ws }) {
+  const [message, setMessage] = useState("");
+
+  function submit(e) {
+    e.preventDefault();
+    ws.send(JSON.stringify({ message }));
+    setMessage("");
+  }
+
+  return (
+    <>
+      <h2>Send an event!</h2>
+      <Form onSubmit={submit}>
+        <Label key="a">
+          <input
+            key="b"
+            type="text"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+          ></input>
+        </Label>
+        <Button>Send</Button>
+      </Form>
+    </>
+  );
+}
+
 export default function Home() {
   const [events, setEvents] = useState({ all: [] });
+  const [ws, setWs] = useState(null);
 
   useEffect(() => {
     const ws = new WebSocket(
       // "wss://api.jeffchen.dev:444" ||
       process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9001"
     );
-
     ws.onmessage = event => {
       const response = JSON.parse(event.data);
       setEvents(events =>
@@ -96,8 +166,9 @@ export default function Home() {
     };
     ws.onclose = () => ws.close();
 
+    setWs(ws);
     return () => ws.close();
-  });
+  }, []);
 
   const eventRows = events.all
     .slice(events.all.length - 50)
@@ -131,6 +202,8 @@ export default function Home() {
 
       <Main>
         <Title>Events</Title>
+        <InputContainer ws={ws}></InputContainer>
+
         {events.all.length === 0
           ? "Waiting for events... maybe Jeff is asleep..."
           : widgets}

@@ -5,7 +5,9 @@ import {
   WebSocket,
   WebSocketServer,
 } from "https://deno.land/x/websocket/mod.ts";
-import { Event } from "./types.ts";
+
+import { sendEvent } from "./event.ts";
+import { Event, EventType } from "./types.ts";
 
 const filters = {
   events: ["visited_url", "switched_tab"],
@@ -38,6 +40,16 @@ class WSSServer {
           `wss connection dropped: ${
             Object.keys(this.connections).length
           } active`
+        );
+      });
+
+      ws.on("message", (msg: string) => {
+        const { message } = JSON.parse(msg);
+        sendEvent(
+          "user_msg",
+          { major: "wss", minor: now.toString() },
+          EventType.Text,
+          message
         );
       });
     });

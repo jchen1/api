@@ -10,6 +10,9 @@ a simple api for logging events
 - [ ] auto database setup & migrations
 - [x] update script
 - [x] simple websocket frontend for incoming events
+  - [x] graphs!
+  - [x] send an event
+  - [ ] auth tokens to view privileged events
 - [ ] better commit workflow
 - [ ] event pushers
   - [x] browsed to webpage
