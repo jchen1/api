@@ -187,11 +187,13 @@ img {
 .wrapper-masthead {
   margin-bottom: 50px;
   width: 100%;
+  max-width: 1400px;
+  border-bottom: 1px solid $lightGray;
 }
 
 .masthead {
   padding: 20px 0;
-  border-bottom: 1px solid $lightGray;
+  max-width: 740px;
 
   @include mobile {
     text-align: center;

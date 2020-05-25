@@ -8,8 +8,9 @@ a simple api for logging events
 - [ ] test reprovisioning a server
 - [ ] database backups?
 - [ ] auto database setup & migrations
-- [ ] update script
-- [ ] simple websocket frontend for incoming events
+- [x] update script
+- [x] simple websocket frontend for incoming events
+- [ ] better commit workflow
 - [ ] event pushers
   - [x] browsed to webpage
   - [ ] whoop
@@ -17,7 +18,7 @@ a simple api for logging events
     - [ ] rest of data...
   - [ ] garmin
   - [ ] fitbit (weight)
-  - [ ] awair
+  - [x] awair
   - [ ] wunderground
   - [ ] roam, when the API exists
   - [ ] ...

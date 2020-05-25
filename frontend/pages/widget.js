@@ -1,57 +1,95 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 
 import { last, prettifyData } from "../lib/util";
 
+const WidgetText = styled.h1`
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const WidgetWrapper = styled.div`
+  width: 45%;
+  flex-grow: 0;
+
+  h2 {
+    text-align: center;
+  }
+
+  @media screen and (max-width: 640px) {
+    width: 100%;
+  }
+`;
+
 function TextWidget({ value }) {
-  return <p>{value ? prettifyData(value) : "---"}</p>;
+  return <WidgetText>{value ? prettifyData(value) : "---"}</WidgetText>;
+}
+
+function formatDate(date) {
+  const d = new Date(date);
+  return `${d
+    .getHours()
+    .toString()
+    .padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+}
+
+function LineWidget({ events }) {
+  // todo import scss colors
+  return (
+    <ResponsiveContainer width="100%" aspect={2}>
+      <LineChart data={events.slice(events.length - 100)}>
+        <Line type="monotone" dataKey="data" stroke="#f03009" dot={false} />
+        <XAxis dataKey="time" tickFormatter={formatDate} />
+        <YAxis />
+      </LineChart>
+    </ResponsiveContainer>
+  );
 }
 
 const types = {
   hr: {
     title: "Heart Rate (bpm)",
-    display: events => <TextWidget value={last(events, {}).data}></TextWidget>,
+    display: events => <LineWidget events={events}></LineWidget>,
   },
   awair_score: {
     title: "Awair Score",
-    display: events => <TextWidget value={last(events, {}).data}></TextWidget>,
+    display: events => <LineWidget events={events}></LineWidget>,
   },
   co2: {
     title: "CO2 (ppm)",
-    display: events => <TextWidget value={last(events, {}).data}></TextWidget>,
+    display: events => <LineWidget events={events}></LineWidget>,
   },
   temp: {
     title: "Temperature (°F)",
-    display: events => <TextWidget value={last(events, {}).data}></TextWidget>,
+    display: events => <LineWidget events={events}></LineWidget>,
   },
   voc: {
     title: "VOC (ppb)",
-    display: events => <TextWidget value={last(events, {}).data}></TextWidget>,
+    display: events => <LineWidget events={events}></LineWidget>,
   },
   humid: {
     title: "Humidity (%)",
-    display: events => <TextWidget value={last(events, {}).data}></TextWidget>,
-  },
-  all: {
-    title: "Events Received",
-    display: events => <TextWidget value={events.length}></TextWidget>,
+    display: events => <LineWidget events={events}></LineWidget>,
   },
 };
 
-const WidgetWrapper = styled.div``;
+export const typeOrder = Object.keys(types);
 
 export default function Widget(props) {
   const type = props.type;
   const events = props.events || [];
 
   if (!types[type]) {
-    return <></>;
+    return null;
   }
 
   const display = types[type].display(events);
 
   return (
-    <WidgetWrapper key={type}>
+    <WidgetWrapper>
       <h2>{types[type].title}</h2>
       {display}
     </WidgetWrapper>

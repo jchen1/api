@@ -4,17 +4,16 @@ import styled from "styled-components";
 
 import Header from "./header";
 import Event from "./event";
-import Widget from "./widget";
+import Widget, { typeOrder } from "./widget";
 
 const Container = styled.div`
   min-height: 100vh;
-  max-height: 100vh;
-  padding: 0 0.5rem;
+  padding: 0 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-width: 740px;
+  max-width: 1400px;
   width: 100%;
   margin: 0 auto;
 `;
@@ -25,7 +24,6 @@ const Main = styled.main`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  overflow: hidden;
   width: 100%;
 `;
 
@@ -37,7 +35,20 @@ const Title = styled.h1`
 const FeedContainer = styled.div`
   padding: 0 2rem;
   max-height: 60rem;
-  flex: 1;
+  flex: 1 1 33%;
+  @media screen and (max-width: 640px) {
+    flex: 1 1 100%;
+  }
+`;
+
+const WidgetContainer = styled.div`
+  padding: 0 2rem;
+  flex: 1 1 67%;
+  display: flex;
+  flex-wrap: wrap;
+  @media screen and (max-width: 640px) {
+    flex: 1 1 100%;
+  }
 `;
 
 const EventContainer = styled.div`
@@ -45,11 +56,13 @@ const EventContainer = styled.div`
   height: 100%;
 `;
 
-const WidgetContainer = styled.div`
+const InnerContainer = styled.div`
   display: flex;
-  height: 100%;
   width: 100%;
-  overflow: hidden;
+  flex-direction: row-reverse;
+  @media screen and (max-width: 640px) {
+    flex-wrap: wrap;
+  }
 `;
 
 export default function Home() {
@@ -91,18 +104,20 @@ export default function Home() {
     .reverse()
     .map(event => Event({ event }));
 
-  const miniWidgets = Object.keys(events).map(type => (
-    <Widget type={type} events={events[type]}></Widget>
-  ));
+  const miniWidgets = Object.keys(events)
+    .sort((a, b) => typeOrder.indexOf(a) - typeOrder.indexOf(b))
+    .map(type => (
+      <Widget key={type} type={type} events={events[type]}></Widget>
+    ));
 
   const widgets = (
-    <WidgetContainer>
+    <InnerContainer>
+      <WidgetContainer>{miniWidgets}</WidgetContainer>
       <FeedContainer>
-        <h2>Raw Event Feed</h2>
+        <h2>Raw Event Feed ({events.all.length} received)</h2>
         <EventContainer>{eventRows}</EventContainer>
       </FeedContainer>
-      <FeedContainer>{miniWidgets}</FeedContainer>
-    </WidgetContainer>
+    </InnerContainer>
   );
 
   return (
