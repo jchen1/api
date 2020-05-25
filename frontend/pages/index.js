@@ -81,6 +81,7 @@ const Label = styled.label`
     padding: 0;
     font-size: 1rem;
     padding: 0 0.5rem;
+    font-family: inherit;
   }
 `;
 
@@ -89,20 +90,21 @@ const Button = styled.button`
   display: inline-block;
   cursor: pointer;
   user-select: none;
-  background: #f03009;
-  filter: brightness(150%);
+  background-color: #f03009;
   text-align: center;
   text-transform: uppercase;
   outline: 0;
-  border: 1px solid #d8d8d8;
+  border: 1px solid #f03009;
   border-left: 0;
   letter-spacing: 0.15rem;
   padding: 0 1rem;
   border-radius: 0 5px 5px 0;
   color: white;
+  transition: background ease-in 0.2s;
 
   &:hover {
-    filter: brightness(100%);
+    background-color: #bd0000;
+    border-color: #bd0000;
   }
 `;
 
