@@ -89,16 +89,20 @@ const Button = styled.button`
   display: inline-block;
   cursor: pointer;
   user-select: none;
-  background: white;
+  background: #f03009;
+  filter: brightness(150%);
   text-align: center;
-  /* text-transform: uppercase; */
+  text-transform: uppercase;
   outline: 0;
   border: 1px solid #d8d8d8;
   border-left: 0;
+  letter-spacing: 0.15rem;
+  padding: 0 1rem;
   border-radius: 0 5px 5px 0;
+  color: white;
 
   &:hover {
-    background-color: #eee;
+    filter: brightness(100%);
   }
 `;
 
@@ -106,6 +110,7 @@ const Form = styled.form`
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 1rem;
 `;
 
 function InputContainer({ ws }) {

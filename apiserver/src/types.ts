@@ -18,3 +18,16 @@ export type Event = {
   data: any;
   time: Date;
 };
+
+export type DBEvent = {
+  event: string;
+  source_major: string;
+  source_minor: string;
+  type: EventType;
+  ts: Date;
+  data_int?: number;
+  data_bigint?: number;
+  data_real?: number;
+  data_text?: string;
+  data_json?: any;
+};

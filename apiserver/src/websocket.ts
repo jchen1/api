@@ -6,6 +6,7 @@ import {
   WebSocketServer,
 } from "https://deno.land/x/websocket/mod.ts";
 
+import db, { fromDB } from "./db/database.ts";
 import { sendEvent } from "./event.ts";
 import { Event, EventType } from "./types.ts";
 
@@ -27,7 +28,7 @@ class WSSServer {
     this.wss = new WebSocketServer(wsPort);
     this.connections = [];
 
-    this.wss.on("connection", (ws: WebSocket) => {
+    this.wss.on("connection", async (ws: WebSocket) => {
       const now = Date.now();
       this.connections[now] = ws;
       log.info(
@@ -52,6 +53,18 @@ class WSSServer {
           message
         );
       });
+
+      // oh my god
+      const { rows } = await db.query(
+        "select event, array_to_string((array_agg(to_json(e) #>> '{}' order by e.ts desc))[1:100], ',') from events e group by event;"
+      );
+      const events = rows
+        .flatMap(r => r[1])
+        .flatMap(a => JSON.parse(`[${a}]`))
+        .map(fromDB)
+        .sort((a, b) => a.time.getTime() - b.time.getTime());
+      this.sendEvents(events);
+      // ws.send(JSON.stringify({ events }));
     });
 
     log.info(`Started wss server on port ${wsPort}`);

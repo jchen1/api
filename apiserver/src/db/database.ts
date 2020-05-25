@@ -1,5 +1,6 @@
 import { config } from "https://deno.land/x/dotenv/mod.ts";
-import { Client } from "https://deno.land/x/postgres/mod.ts";
+import { Client } from "https://deno.land/x/postgres@v0.4.1/mod.ts";
+import { DBEvent, Event } from "../types.ts";
 
 class Database {
   client: Client;
@@ -18,6 +19,29 @@ class Database {
       password,
     });
   }
+}
+
+export function fromDB(e: DBEvent): Event {
+  return {
+    event: e.event,
+    source: { major: e.source_major, minor: e.source_minor },
+    type: e.type,
+    time: new Date(e.ts),
+    data: (e as any)[`data_${e.type}`],
+  };
+}
+
+export function toDB(e: Event): DBEvent {
+  const dbe = {
+    event: e.event,
+    source_major: e.source.major,
+    source_minor: e.source.minor,
+    type: e.type,
+    ts: e.time,
+  };
+  (dbe as any)[`data_${e.type}`] = e.data;
+
+  return dbe;
 }
 
 export default new Database().client;
