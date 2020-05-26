@@ -87,12 +87,17 @@ class Awair implements ICronHandler {
     );
 
     const deviceToLastIngest = rows.reduce((acc, row) => {
-      acc[row[0]] = acc[row[1]];
+      acc[row[0]] = row[1];
       return acc;
     }, {});
 
     for (const d of this.devices) {
       const ts = deviceToLastIngest[deviceId(d)];
+      if (!ts) {
+        log.warning(
+          `awair: no start time for ${deviceId(d)}, defaulting to 24 hours ago`
+        );
+      }
       const start = new Date(
         ts ? ts.getTime() + 1000 : Date.now() - 1000 * 60 * 60 * 24
       );
