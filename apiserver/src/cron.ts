@@ -63,13 +63,13 @@ export class Cron {
   };
 
   async start() {
-    let jobs: any[] = this.filterJobs();
-    for (let i = 0; i < jobs.length; i++) {
-      jobs[i]();
-    }
+    const jobs: any[] = this.filterJobs();
     setTimeout(() => {
       this.start();
     }, (61 - new Date().getSeconds()) * 1000);
+    for (let i = 0; i < jobs.length; i++) {
+      await jobs[i]();
+    }
   }
 }
 
