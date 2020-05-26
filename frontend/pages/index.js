@@ -75,6 +75,7 @@ const Label = styled.label`
   background-color: white;
   cursor: text;
   flex-grow: 1;
+  margin: 0;
 
   input {
     -webkit-appearance: none;
@@ -103,6 +104,7 @@ const Button = styled.button`
   color: white;
   transition: background ease-in 0.2s;
   flex-grow: 1;
+  margin: 0;
 
   &:hover {
     background-color: #bd0000;
