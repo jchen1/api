@@ -1,6 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  Tooltip,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+} from "recharts";
 
 import { last, prettifyData } from "../lib/util";
 
@@ -37,6 +44,7 @@ function formatDate(date) {
 }
 
 function LineWidget({ events }) {
+  const formatter = (value, name, props) => prettifyData(value);
   // todo import scss colors
   return (
     <ResponsiveContainer width="100%" aspect={2}>
@@ -44,6 +52,7 @@ function LineWidget({ events }) {
         <Line type="monotone" dataKey="data" stroke="#f03009" dot={false} />
         <XAxis dataKey="time" tickFormatter={formatDate} />
         <YAxis />
+        <Tooltip formatter={formatter} labelFormatter={formatDate} />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -52,6 +61,7 @@ function LineWidget({ events }) {
 const types = {
   hr: {
     title: "Heart Rate (bpm)",
+    units: "bpm",
     display: events => <LineWidget events={events}></LineWidget>,
   },
   awair_score: {
@@ -60,18 +70,22 @@ const types = {
   },
   co2: {
     title: "CO2 (ppm)",
+    units: "ppm",
     display: events => <LineWidget events={events}></LineWidget>,
   },
   temp: {
     title: "Temperature (°F)",
+    units: "°F",
     display: events => <LineWidget events={events}></LineWidget>,
   },
   voc: {
     title: "VOC (ppb)",
+    units: "ppb",
     display: events => <LineWidget events={events}></LineWidget>,
   },
   humid: {
     title: "Humidity (%)",
+    units: "%",
     display: events => <LineWidget events={events}></LineWidget>,
   },
 };
