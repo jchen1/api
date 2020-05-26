@@ -3,7 +3,7 @@ import * as log from "https://deno.land/std/log/mod.ts";
 
 import db from "../db/database.ts";
 import { sendEvents } from "../event.ts";
-import { EventType } from "../types.ts";
+import { ICronHandler, EventType } from "../types.ts";
 
 type Token = {
   user_id: number;
@@ -58,11 +58,13 @@ async function getHR(token: Token, start: Date, end = new Date(), step = 6) {
   );
 }
 
-class Whoop {
+class Whoop implements ICronHandler {
   username?: string;
   password?: string;
 
   token?: Token;
+
+  schedule = "* * * * *";
 
   constructor() {
     this.username = config().WHOOP_USERNAME;
@@ -83,7 +85,7 @@ class Whoop {
     await this.updateToken();
   }
 
-  async ingest() {
+  async handler() {
     if (!this.token) {
       return;
     }

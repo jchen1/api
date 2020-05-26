@@ -3,7 +3,7 @@ import * as log from "https://deno.land/std/log/mod.ts";
 
 import db from "../db/database.ts";
 import { sendEvents } from "../event.ts";
-import { EventType, Event } from "../types.ts";
+import { ICronHandler, EventType, Event } from "../types.ts";
 
 type Device = {
   type: string;
@@ -49,9 +49,11 @@ function deviceId(d: Device) {
   return `${d.type}_${d.id}`;
 }
 
-class Awair {
+class Awair implements ICronHandler {
   token?: string;
   devices: Device[];
+
+  schedule = "*/10 * * * *";
 
   constructor() {
     this.token = config().AWAIR_API_TOKEN;
@@ -69,7 +71,7 @@ class Awair {
     this.devices = await getDevices(this.token);
   }
 
-  async ingest() {
+  async handler() {
     if (!this.token) {
       return;
     }

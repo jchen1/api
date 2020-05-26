@@ -31,3 +31,9 @@ export type DBEvent = {
   data_text?: string;
   data_json?: any;
 };
+
+export interface ICronHandler {
+  schedule: string;
+  handler: () => void | Promise<void>;
+  init: () => void | Promise<void>;
+}
