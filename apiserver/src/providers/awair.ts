@@ -53,7 +53,7 @@ class Awair implements ICronHandler {
   token?: string;
   devices: Device[];
 
-  schedule = "*/10 * * * *";
+  schedule = "*/5 * * * *";
 
   constructor() {
     this.token = config().AWAIR_API_TOKEN;
