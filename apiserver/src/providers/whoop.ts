@@ -120,7 +120,7 @@ class Whoop implements ICronHandler {
 
     await sendEvents(events);
 
-    log.info(`whoop: ingested ${values.length} events`);
+    log.info(`whoop: ingested ${values.length} events starting from ${start}`);
   }
 }
 

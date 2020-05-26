@@ -122,7 +122,9 @@ class Awair implements ICronHandler {
 
       await sendEvents(events);
 
-      log.info(`awair: ingested ${events.length} events`);
+      log.info(
+        `awair: ingested ${events.length} events starting from ${start}`
+      );
     }
   }
 }
