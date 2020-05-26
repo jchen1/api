@@ -71,8 +71,10 @@ const Label = styled.label`
   align-items: center;
   border-radius: 5px 0 0 5px;
   border: 1px solid #d8d8d8;
+  border-right: 0;
   background-color: white;
   cursor: text;
+  flex-grow: 1;
 
   input {
     -webkit-appearance: none;
