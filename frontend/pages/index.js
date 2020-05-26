@@ -103,6 +103,7 @@ const Button = styled.button`
   border-radius: 0 5px 5px 0;
   color: white;
   transition: background ease-in 0.2s;
+  flex-grow: 1;
 
   &:hover {
     background-color: #bd0000;
