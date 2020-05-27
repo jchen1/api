@@ -1,9 +1,9 @@
 import { config } from "https://deno.land/x/dotenv/mod.ts";
-import { Client } from "https://deno.land/x/postgres@v0.4.1/mod.ts";
+import { Pool } from "https://deno.land/x/postgres@v0.4.1/mod.ts";
 import { DBEvent, Event } from "../types.ts";
 
 class Database {
-  client: Client;
+  client: Pool;
 
   constructor() {
     const user = config().DB_USER || "postgres";
@@ -11,13 +11,16 @@ class Database {
     const hostname = config().DB_HOST || "127.0.0.1";
     const port = parseInt(config().DB_PORT || "5432");
     const password = config().DB_PASSWORD;
-    this.client = new Client({
-      user,
-      database,
-      hostname,
-      port,
-      password,
-    });
+    this.client = new Pool(
+      {
+        user,
+        database,
+        hostname,
+        port,
+        password,
+      },
+      50
+    );
   }
 }
 
