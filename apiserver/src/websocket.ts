@@ -79,7 +79,7 @@ class WSSServer {
               MIN(data_real) AS data_real, 
               FIRST(data_text) AS data_text, 
               FIRST(data_json) AS data_json 
-            FROM events_by_minute WHERE minute > now() - INTERVAL '1 day' 
+            FROM events_by_minute WHERE minute > now() - INTERVAL '12 hour'
             GROUP BY event, minute 
             ORDER BY minute DESC;`
           );
