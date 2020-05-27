@@ -204,7 +204,10 @@ export default function Home() {
 
   useEffect(() => {
     const ws = connect(setEvents, setWs);
-    ws.send(JSON.stringify({ type: "connect " }));
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: "connect" }));
+    };
 
     setWs(ws);
     return () => ws.close();
