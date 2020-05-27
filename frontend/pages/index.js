@@ -164,11 +164,14 @@ function InputContainer({ ws }) {
 
 function connect(setEvents, setWs) {
   const ws = new WebSocket(
-    // "wss://api.jeffchen.dev:444" ||
-    process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9001"
+    "wss://api.jeffchen.dev:444" ||
+      process.env.NEXT_PUBLIC_WS_URL ||
+      "ws://localhost:9001"
   );
   ws.onmessage = event => {
     const response = JSON.parse(event.data);
+    const keys = {};
+
     setEvents(events =>
       response.events.reduce(
         (acc, event) => {
@@ -178,10 +181,27 @@ function connect(setEvents, setWs) {
           }
           acc.all.push(event);
 
-          if (!acc.hasOwnProperty(event.event)) {
-            acc[event.event] = [];
+          // only store one event per minute for widgets
+          const key = `${event.event}-${Math.floor(
+            event.time.getTime() / 1000 / 60
+          )}`;
+          if (!keys.hasOwnProperty(key)) {
+            keys[key] = true;
+
+            if (!acc.hasOwnProperty(event.event)) {
+              acc[event.event] = { events: [], last: [] };
+            }
+            acc[event.event].last.push(event);
+
+            acc[event.event].last = acc[event.event].last.filter(
+              e => event.time.getTime() - e.time.getTime() < 1000 * 60 * 15
+            );
+            event.dataAvg =
+              acc[event.event].last.reduce((s, e) => s + e.data, 0) /
+              Math.max(1, acc[event.event].last.length);
+            acc[event.event].events.push(event);
           }
-          acc[event.event].push(event);
+
           return acc;
         },
         { ...events }
@@ -214,7 +234,7 @@ export default function Home() {
   }, []);
 
   const eventRows = events.all
-    .slice(events.all.length - 50)
+    .slice(events.all.length - 100)
     .reverse()
     .map((event, i) => Event({ event, idx: i }));
 

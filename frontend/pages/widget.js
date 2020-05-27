@@ -36,8 +36,15 @@ function TextWidget({ events }) {
   return <WidgetText>{value ? prettifyData(value) : "---"}</WidgetText>;
 }
 
-function formatDate(date) {
+function dateToHours(date) {
   const d = new Date(date);
+  const hours = ((d.getHours() + 11) % 12) + 1;
+  return `${hours}${d.getHours() >= 12 ? "PM" : "AM"}`;
+}
+
+function dateToTime(date) {
+  const d = new Date(date);
+
   return `${d
     .getHours()
     .toString()
@@ -45,26 +52,32 @@ function formatDate(date) {
 }
 
 function LineWidget({ events, opts }) {
-  const formatter = (value, name, props) => prettifyData(value);
+  const formatter = (value, name, props) => [
+    prettifyData(value),
+    opts.units || "data",
+  ];
   const { xDomain, yDomain, scale } = opts;
+
   // todo import scss colors
   return (
     <ResponsiveContainer width="100%" aspect={2}>
       <LineChart data={events}>
-        <Line type="monotone" dataKey="data" stroke="#f03009" dot={false} />
+        <Line type="monotone" dataKey="dataAvg" stroke="#f03009" dot={false} />
         <XAxis
           dataKey={v => v.time.getTime()}
-          tickFormatter={formatDate}
+          tickFormatter={dateToHours}
           interval="preserveStartEnd"
-          scale="linear"
+          scale="time"
+          type="number"
           domain={xDomain || ["auto", "auto"]}
         />
         <YAxis
           domain={yDomain || ["auto", "auto"]}
+          tickFormatter={n => Math.round(n)}
           interval="preserveStartEnd"
           scale={scale || "auto"}
         />
-        <Tooltip formatter={formatter} labelFormatter={formatDate} />
+        <Tooltip formatter={formatter} labelFormatter={dateToTime} />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -113,7 +126,7 @@ export const typeOrder = Object.keys(types);
 
 export default function Widget(props) {
   const type = props.type;
-  const events = props.events || [];
+  const events = (props.events || {}).events || [];
 
   if (!types[type]) {
     return null;
