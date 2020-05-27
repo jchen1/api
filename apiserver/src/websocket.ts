@@ -48,15 +48,71 @@ class WSSServer {
         const parsed = JSON.parse(msg);
         if (parsed.type === "connect") {
           // oh my god
+          // const { rows } = await db.query(
+          //   "select event, array_to_string((array_agg(to_json(e) #>> '{}' order by e.ts desc))[1:100], ',') from events e group by event;"
+          // );
           const { rows } = await db.query(
-            "select event, array_to_string((array_agg(to_json(e) #>> '{}' order by e.ts desc))[1:100], ',') from events e group by event;"
+            `WITH 
+              events_with_minute AS 
+                (SELECT DATE_TRUNC('minute', ts) as minute, * from events), 
+              events_by_minute AS 
+                (SELECT 
+                  minute, 
+                  event,
+                  source_major,
+                  source_minor, 
+                  type, 
+                  CAST(AVG(data_int) OVER w AS INT) AS data_int, 
+                  CAST(AVG(data_bigint)  OVER w AS BIGINT) AS data_bigint, 
+                  AVG(data_real) OVER w AS data_real, 
+                  FIRST_VALUE(data_text) OVER w AS data_text, 
+                  FIRST_VALUE(data_json) OVER w AS data_json 
+                FROM events_with_minute WINDOW w AS (PARTITION BY event, minute)) 
+            SELECT 
+              minute AS ts,
+              event,
+              MIN(source_major) AS source_major, 
+              MIN(source_minor) AS source_minor, 
+              CAST(MIN(type) AS TEXT) as type, 
+              MIN(data_int) AS data_int, 
+              MIN(data_bigint) AS data_bigint, 
+              MIN(data_real) AS data_real, 
+              FIRST(data_text) AS data_text, 
+              FIRST(data_json) AS data_json 
+            FROM events_by_minute WHERE minute > now() - INTERVAL '1 day' 
+            GROUP BY event, minute 
+            ORDER BY minute DESC;`
           );
           const events = rows
-            .flatMap(r => r[1])
-            .flatMap(a => JSON.parse(`[${a}]`))
+            .map(
+              ([
+                ts,
+                event,
+                source_major,
+                source_minor,
+                type,
+                data_int,
+                data_bigint,
+                data_real,
+                data_text,
+                data_json,
+              ]) => ({
+                ts,
+                event,
+                source_major,
+                source_minor,
+                type,
+                data_int,
+                data_bigint,
+                data_real,
+                data_text,
+                data_json,
+              })
+            )
             .map(fromDB)
-            .sort((a, b) => a.time.getTime() - b.time.getTime());
-          this.sendEvents(events);
+            .reverse();
+
+          return this.sendEvents(events);
         } else if (parsed.type === "reconnect") {
           // meh
         } else if (parsed.type === "message") {

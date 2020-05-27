@@ -22,7 +22,7 @@ const EventCard = styled.div`
   }
 `;
 
-export default function Event({ event }) {
+export default function Event({ event, idx }) {
   if (!event) return null;
 
   const title =
@@ -31,10 +31,12 @@ export default function Event({ event }) {
       : `${event.event} - ${prettifyData(event.data)}`;
   return (
     <EventCard
-      key={`${event.event}.${event.source.major}.${event.source.minor}.${event.time}`}
+      key={`${event.event}.${event.source.major}.${
+        event.source.minor
+      }.${event.time.toString()}.${idx}`}
     >
       <h3>{title}</h3>
-      <p>{event.time}</p>
+      <p>{event.time.toLocaleString()}</p>
       <em>
         {event.source.major} - {event.source.minor}
       </em>

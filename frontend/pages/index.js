@@ -164,15 +164,15 @@ function InputContainer({ ws }) {
 
 function connect(setEvents, setWs) {
   const ws = new WebSocket(
-    "wss://api.jeffchen.dev:444" ||
-      process.env.NEXT_PUBLIC_WS_URL ||
-      "ws://localhost:9001"
+    // "wss://api.jeffchen.dev:444" ||
+    process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9001"
   );
   ws.onmessage = event => {
     const response = JSON.parse(event.data);
     setEvents(events =>
       response.events.reduce(
         (acc, event) => {
+          event.time = new Date(event.time);
           if (!acc.hasOwnProperty("all")) {
             acc.all = [];
           }
@@ -216,7 +216,7 @@ export default function Home() {
   const eventRows = events.all
     .slice(events.all.length - 50)
     .reverse()
-    .map(event => Event({ event }));
+    .map((event, i) => Event({ event, idx: i }));
 
   const socketColor = (function () {
     // if server-side rendered
