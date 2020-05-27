@@ -141,20 +141,11 @@ class WSSServer {
       })),
     };
 
-    const promises = Object.entries(this.connections).map(async ([k, ws]) => {
-      try {
-        await ws.send(JSON.stringify(message));
-      } catch (err) {
-        log.warning(`Failed to send to ws ${k}, dropping connection!`);
-        try {
-          await ws.closeForce();
-        } catch {}
-        delete this.connections[k];
-        throw err;
-      }
-    });
+    const json = JSON.stringify(message);
 
-    return Promise.allSettled(promises);
+    return Promise.allSettled(
+      Object.values(this.connections).map(ws => ws.send(json))
+    );
   }
 }
 
