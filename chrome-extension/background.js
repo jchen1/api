@@ -2,17 +2,17 @@
 
 const apiURL = "https://api.jeffchen.dev/";
 
-function sendEvent(url, event) {
+function sendEvent(urlOrId, event) {
   chrome.storage.sync.get({ token: "" }, ({ token }) => {
-    if (token !== "" && url !== "") {
+    if (token !== "" && urlOrId !== "") {
       const data = {
         event,
         source: {
           major: "chrome-extension",
           minor: "v0.1",
         },
-        type: "text",
-        data: url,
+        type: typeof urlOrId === "string" ? "text" : "int",
+        data: urlOrId,
       };
       return fetch(apiURL, {
         method: "POST",
@@ -37,4 +37,20 @@ chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
   chrome.tabs.get(tabId, tab => {
     sendEvent(tab.url, "switched_tab");
   });
+});
+
+chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  sendEvent(tabId, "closed_tab");
+});
+
+chrome.windows.onCreated.addListener(window =>
+  sendEvent(window.id, "opened_window")
+);
+chrome.windows.onRemoved.addListener(windowId =>
+  sendEvent(windowId, "closed_window")
+);
+chrome.windows.onFocusChanged.addListener(windowId => {
+  if (windowId >= 0) {
+    sendEvent(windowId, "switched_window");
+  }
 });
