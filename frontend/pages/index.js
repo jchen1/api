@@ -27,9 +27,25 @@ const Main = styled.main`
   width: 100%;
 `;
 
-const Title = styled.h1`
-  font-size: 3rem;
+const TitleContainer = styled.div`
+  display: flex;
   margin: 0 0 1rem 0;
+  align-items: center;
+  justify-content: space-evenly;
+
+  h1 {
+    font-size: 3rem;
+    margin: 0;
+  }
+`;
+
+const WSIndicator = styled.div`
+  background-color: ${props => props.color};
+  height: 1rem;
+  width: 1rem;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 1rem;
 `;
 
 const FeedContainer = styled.div`
@@ -146,37 +162,42 @@ function InputContainer({ ws }) {
   );
 }
 
+function connect(setEvents) {
+  const ws = new WebSocket(
+    // "wss://api.jeffchen.dev:444" ||
+    process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9001"
+  );
+  ws.onmessage = event => {
+    const response = JSON.parse(event.data);
+    setEvents(events =>
+      response.events.reduce(
+        (acc, event) => {
+          if (!acc.hasOwnProperty("all")) {
+            acc.all = [];
+          }
+          acc.all.push(event);
+
+          if (!acc.hasOwnProperty(event.event)) {
+            acc[event.event] = [];
+          }
+          acc[event.event].push(event);
+          return acc;
+        },
+        { ...events }
+      )
+    );
+  };
+  ws.onclose = () => setTimeout(() => connect(setEvents), 1000);
+
+  return ws;
+}
+
 export default function Home() {
   const [events, setEvents] = useState({ all: [] });
   const [ws, setWs] = useState(null);
 
   useEffect(() => {
-    const ws = new WebSocket(
-      // "wss://api.jeffchen.dev:444" ||
-      process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9001"
-    );
-    ws.onmessage = event => {
-      const response = JSON.parse(event.data);
-      setEvents(events =>
-        response.events.reduce(
-          (acc, event) => {
-            if (!acc.hasOwnProperty("all")) {
-              acc.all = [];
-            }
-            acc.all.push(event);
-
-            if (!acc.hasOwnProperty(event.event)) {
-              acc[event.event] = [];
-            }
-            acc[event.event].push(event);
-            return acc;
-          },
-          { ...events }
-        )
-      );
-    };
-    ws.onclose = () => ws.close();
-
+    const ws = connect(setEvents);
     setWs(ws);
     return () => ws.close();
   }, []);
@@ -185,6 +206,22 @@ export default function Home() {
     .slice(events.all.length - 50)
     .reverse()
     .map(event => Event({ event }));
+
+  const socketColor = (function () {
+    // if server-side rendered
+    if (!ws) return "#f03009";
+
+    const socketState = ws.readyState;
+    switch (socketState) {
+      case WebSocket.OPEN:
+        return "#68b723";
+      case WebSocket.CONNECTING:
+        return "#f37329";
+      // CLOSING/CLOSED/NULL
+      default:
+        return "#f03009";
+    }
+  })();
 
   const miniWidgets = Object.keys(events)
     .sort((a, b) => typeOrder.indexOf(a) - typeOrder.indexOf(b))
@@ -205,19 +242,20 @@ export default function Home() {
   return (
     <Container>
       <Head>
-        <title>Jeff's Events</title>
+        <title>api.jeffchen.dev</title>
         <link rel="icon" href="https://www.jeffchen.dev/favicon.ico" />
       </Head>
 
       <Header></Header>
 
       <Main>
-        <Title>Events</Title>
+        <TitleContainer>
+          <h1>Metrics</h1>
+          <WSIndicator color={socketColor} />
+        </TitleContainer>
         <InputContainer ws={ws}></InputContainer>
 
-        {events.all.length === 0
-          ? "Waiting for events... maybe Jeff is asleep..."
-          : widgets}
+        {events.all.length === 0 ? "Loading..." : widgets}
       </Main>
     </Container>
   );
