@@ -187,7 +187,6 @@ function connect(setEvents) {
       )
     );
   };
-  ws.onclose = () => setTimeout(() => connect(setEvents), 1000);
 
   return ws;
 }
@@ -198,6 +197,8 @@ export default function Home() {
 
   useEffect(() => {
     const ws = connect(setEvents);
+    ws.onclose = () => setTimeout(() => connect(setEvents), 1000);
+
     setWs(ws);
     return () => ws.close();
   }, []);
