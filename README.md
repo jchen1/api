@@ -20,8 +20,8 @@ a simple api for logging events
 - [ ] oauth table (blocks fitbit)
 - [ ] event pushers
   - [x] browsed to webpage
-    - [ ] swapped chrome window
-    - [ ] closed tab / window
+    - [x] swapped chrome window
+    - [x] closed tab / window
     - [ ] install on desktop
   - [ ] mac app - like rescuetime?
     - [ ] use hammerspoon?

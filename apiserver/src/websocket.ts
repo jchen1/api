@@ -19,17 +19,17 @@ const filters = {
 // todo gzip
 class WSSServer {
   wss: WebSocketServer;
-  connections: Record<number, WebSocket>;
+  connections: Record<string, WebSocket>;
 
   constructor() {
     const port = parseInt(config().APP_PORT || "9000");
     const wsPort = parseInt(config().WSS_PORT) || port + 1;
 
     this.wss = new WebSocketServer(wsPort);
-    this.connections = [];
+    this.connections = {};
 
     this.wss.on("connection", async (ws: WebSocket) => {
-      const now = Date.now();
+      const now = String(Date.now());
       this.connections[now] = ws;
       log.info(
         `new wss connection: ${Object.keys(this.connections).length} active`
@@ -62,7 +62,7 @@ class WSSServer {
         } else if (parsed.type === "message") {
           sendEvent(
             "user_msg",
-            { major: "wss", minor: now.toString() },
+            { major: "wss", minor: now },
             EventType.Text,
             parsed.message
           );
@@ -85,9 +85,19 @@ class WSSServer {
       })),
     };
 
-    const promises = Object.values(this.connections).map(ws =>
-      ws.send(JSON.stringify(message))
-    );
+    const promises = Object.entries(this.connections).map(async ([k, ws]) => {
+      try {
+        await ws.send(JSON.stringify(message));
+      } catch (err) {
+        log.warning(`Failed to send to ws ${k}, dropping connection!`);
+        try {
+          await ws.closeForce();
+        } catch {}
+        delete this.connections[k];
+        throw err;
+      }
+    });
+
     return Promise.allSettled(promises);
   }
 }
