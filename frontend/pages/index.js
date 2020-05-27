@@ -164,9 +164,8 @@ function InputContainer({ ws }) {
 
 function connect(setEvents, setWs) {
   const ws = new WebSocket(
-    "wss://api.jeffchen.dev:444" ||
-      process.env.NEXT_PUBLIC_WS_URL ||
-      "ws://localhost:9001"
+    // "wss://api.jeffchen.dev:444" ||
+    process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9001"
   );
   ws.onmessage = event => {
     const response = JSON.parse(event.data);

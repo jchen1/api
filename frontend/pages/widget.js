@@ -62,7 +62,13 @@ function LineWidget({ events, opts }) {
   return (
     <ResponsiveContainer width="100%" aspect={2}>
       <LineChart data={events}>
-        <Line type="monotone" dataKey="dataAvg" stroke="#f03009" dot={false} />
+        <Line
+          type="monotone"
+          dataKey="dataAvg"
+          stroke="#f03009"
+          dot={false}
+          isAnimationActive={false}
+        />
         <XAxis
           dataKey={v => v.time.getTime()}
           tickFormatter={dateToHours}
