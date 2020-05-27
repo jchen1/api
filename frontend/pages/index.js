@@ -276,7 +276,7 @@ export default function Home() {
     <Container>
       <Head>
         <title>api.jeffchen.dev</title>
-        <link rel="icon" href="https://www.jeffchen.dev/favicon.ico" />
+        <link rel="icon" href="https://jeffchen.dev/favicon.ico" />
       </Head>
 
       <Header></Header>
