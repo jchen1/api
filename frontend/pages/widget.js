@@ -29,6 +29,10 @@ const WidgetWrapper = styled.div`
   @media screen and (max-width: 640px) {
     width: 100%;
   }
+
+  text.recharts-cartesian-axis-tick-value {
+    user-select: none;
+  }
 `;
 
 function TextWidget({ events }) {

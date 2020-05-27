@@ -47,10 +47,6 @@ class WSSServer {
       ws.on("message", async (msg: string) => {
         const parsed = JSON.parse(msg);
         if (parsed.type === "connect") {
-          // oh my god
-          // const { rows } = await db.query(
-          //   "select event, array_to_string((array_agg(to_json(e) #>> '{}' order by e.ts desc))[1:100], ',') from events e group by event;"
-          // );
           const { rows } = await db.query(
             `WITH 
               events_with_minute AS 
