@@ -162,10 +162,11 @@ function InputContainer({ ws }) {
   );
 }
 
-function connect(setEvents) {
+function connect(setEvents, setWs) {
   const ws = new WebSocket(
-    // "wss://api.jeffchen.dev:444" ||
-    process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9001"
+    "wss://api.jeffchen.dev:444" ||
+      process.env.NEXT_PUBLIC_WS_URL ||
+      "ws://localhost:9001"
   );
   ws.onmessage = event => {
     const response = JSON.parse(event.data);
@@ -188,6 +189,12 @@ function connect(setEvents) {
     );
   };
 
+  ws.onclose = () =>
+    setTimeout(() => {
+      const ws = connect(setEvents, setWs);
+      return setWs(ws);
+    }, 1000);
+
   return ws;
 }
 
@@ -196,8 +203,7 @@ export default function Home() {
   const [ws, setWs] = useState(null);
 
   useEffect(() => {
-    const ws = connect(setEvents);
-    ws.onclose = () => setTimeout(() => connect(setEvents), 1000);
+    const ws = connect(setEvents, setWs);
 
     setWs(ws);
     return () => ws.close();

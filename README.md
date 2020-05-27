@@ -13,7 +13,7 @@ a simple api for logging events
   - [x] graphs!
   - [x] send an event
   - [x] reconnect when server drops
-    - [ ] status icon
+    - [x] status icon
   - [ ] auth tokens to view privileged events
 - [ ] better commit workflow
   - [ ] github actions - install ssh key & write some bash
