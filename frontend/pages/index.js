@@ -140,7 +140,7 @@ function InputContainer({ ws }) {
 
   function submit(e) {
     e.preventDefault();
-    ws.send(JSON.stringify({ message }));
+    ws.send(JSON.stringify({ type: "message", message }));
     setMessage("");
   }
 
@@ -204,6 +204,7 @@ export default function Home() {
 
   useEffect(() => {
     const ws = connect(setEvents, setWs);
+    ws.send(JSON.stringify({ type: "connect " }));
 
     setWs(ws);
     return () => ws.close();

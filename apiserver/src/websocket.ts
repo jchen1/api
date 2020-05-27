@@ -44,27 +44,30 @@ class WSSServer {
         );
       });
 
-      ws.on("message", (msg: string) => {
-        const { message } = JSON.parse(msg);
-        sendEvent(
-          "user_msg",
-          { major: "wss", minor: now.toString() },
-          EventType.Text,
-          message
-        );
+      ws.on("message", async (msg: string) => {
+        const parsed = JSON.parse(msg);
+        if (parsed.type === "connect") {
+          // oh my god
+          const { rows } = await db.query(
+            "select event, array_to_string((array_agg(to_json(e) #>> '{}' order by e.ts desc))[1:100], ',') from events e group by event;"
+          );
+          const events = rows
+            .flatMap(r => r[1])
+            .flatMap(a => JSON.parse(`[${a}]`))
+            .map(fromDB)
+            .sort((a, b) => a.time.getTime() - b.time.getTime());
+          this.sendEvents(events);
+        } else if (parsed.type === "reconnect") {
+          // meh
+        } else if (parsed.type === "message") {
+          sendEvent(
+            "user_msg",
+            { major: "wss", minor: now.toString() },
+            EventType.Text,
+            parsed.message
+          );
+        }
       });
-
-      // oh my god
-      const { rows } = await db.query(
-        "select event, array_to_string((array_agg(to_json(e) #>> '{}' order by e.ts desc))[1:100], ',') from events e group by event;"
-      );
-      const events = rows
-        .flatMap(r => r[1])
-        .flatMap(a => JSON.parse(`[${a}]`))
-        .map(fromDB)
-        .sort((a, b) => a.time.getTime() - b.time.getTime());
-      this.sendEvents(events);
-      // ws.send(JSON.stringify({ events }));
     });
 
     log.info(`Started wss server on port ${wsPort}`);
