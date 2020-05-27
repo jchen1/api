@@ -20,29 +20,37 @@ export class Cron {
     });
   };
 
-  matches = (cronPart: string, currPart: string): boolean => {
-    const currNum = parseInt(currPart);
-    if (cronPart === "*") return true;
-    if (cronPart === currPart) return true;
+  matches = (cronPart: string, currPart: number): boolean => {
+    const opts = cronPart.split(",").map(p => p.trim());
 
-    const stepMatch = cronPart.match(/\*\/(\d+)/);
-    if (stepMatch !== null) {
-      const step = parseInt(stepMatch[1]);
-      return currNum % step === 0;
-    }
+    return opts.some(part => {
+      if (cronPart === "*") return true;
+      if (cronPart === String(currPart)) return true;
 
-    // todo range of values, step values
+      const rangeMatch = part.match(/(\d+)-(\d+)/);
+      if (rangeMatch !== null) {
+        const start = parseInt(rangeMatch[1]);
+        const end = parseInt(rangeMatch[2]);
+        return start <= currPart && currPart <= end;
+      }
 
-    return false;
+      const stepMatch = cronPart.match(/\*\/(\d+)/);
+      if (stepMatch !== null) {
+        const step = parseInt(stepMatch[1]);
+        return currPart % step === 0;
+      }
+
+      return false;
+    });
   };
 
   validate = (schedule: string): boolean => {
     const now = new Date();
-    const minutes = String(now.getMinutes());
-    const hours = String(now.getHours());
-    const dayOfMonth = String(now.getDate());
-    const month = String(now.getMonth() + 1);
-    const dayOfWeek = String(now.getDay());
+    const minutes = now.getMinutes();
+    const hours = now.getHours();
+    const dayOfMonth = now.getDate();
+    const month = now.getMonth() + 1;
+    const dayOfWeek = now.getDay();
 
     const crontab = schedule.split(" ");
     const currTime = [minutes, hours, dayOfMonth, month, dayOfWeek];
@@ -84,7 +92,6 @@ const jobs: Record<string, ICronHandler> = {
 
 for (const name in jobs) {
   const worker = jobs[name];
-  // const { schedule, handler } = ;
   cron.add(worker.schedule, async () => {
     const start = new Date();
     log.info(`${start.toString()}: Starting job ${name}`);
