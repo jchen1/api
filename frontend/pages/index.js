@@ -65,6 +65,7 @@ const WidgetContainer = styled.div`
   flex-wrap: wrap;
   @media screen and (max-width: 640px) {
     flex: 1 1 100%;
+    padding: 0;
   }
 `;
 
@@ -208,7 +209,9 @@ export default function Home() {
     <InnerContainer>
       <WidgetContainer>{miniWidgets}</WidgetContainer>
       <FeedContainer>
-        <h2>Raw Event Feed ({events.all.length} received)</h2>
+        <h2>
+          Raw Event Feed <br /> ({events.all.length} received)
+        </h2>
         <EventContainer>{eventRows}</EventContainer>
       </FeedContainer>
     </InnerContainer>
