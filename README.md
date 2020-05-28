@@ -14,6 +14,8 @@ a simple api for logging events
   - [x] send an event
   - [x] reconnect when server drops
     - [x] status icon
+  - [x] basic time picker
+  - [ ] move off of static export - deploy to jeffchen.dev/events
   - [ ] auth tokens to view privileged events
 - [ ] better commit workflow
   - [ ] github actions - install ssh key & write some bash
