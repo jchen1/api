@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useReducer, useEffect } from "react";
 import styled from "styled-components";
 import {
   LineChart,
@@ -62,10 +62,16 @@ function LineWidget({ events, opts }) {
   ];
   const { xDomain, yDomain, scale } = opts;
 
+  const [renderCount, forceUpdate] = useReducer(x => x + 1, 0);
+
+  useEffect(() => {
+    forceUpdate();
+  }, [events]);
+
   // todo import scss colors
   return (
     <ResponsiveContainer width="100%" aspect={2}>
-      <LineChart data={events}>
+      <LineChart data={events} key={renderCount}>
         <Line
           type="monotone"
           dataKey="dataAvg"
@@ -79,13 +85,15 @@ function LineWidget({ events, opts }) {
           interval="preserveStartEnd"
           scale="time"
           type="number"
-          domain={xDomain || ["auto", "auto"]}
+          domain={xDomain || ["dataMin", "dataMax"]}
+          key={events.length}
         />
         <YAxis
           domain={yDomain || ["auto", "auto"]}
           tickFormatter={n => Math.round(n)}
           interval="preserveStartEnd"
           scale={scale || "auto"}
+          // key={events.length}
         />
         <Tooltip formatter={formatter} labelFormatter={dateToTime} />
       </LineChart>
