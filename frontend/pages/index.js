@@ -166,14 +166,15 @@ function connect(setEvents, setWs) {
   const keys = {};
 
   const ws = new WebSocket(
-    // "wss://api.jeffchen.dev:444" ||
-    process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9001"
+    "wss://api.jeffchen.dev:444" ||
+      process.env.NEXT_PUBLIC_WS_URL ||
+      "ws://localhost:9001"
   );
   ws.onmessage = event => {
     const response = JSON.parse(event.data);
 
-    setEvents(events =>
-      response.events.reduce(
+    setEvents(events => {
+      const nextEvents = response.events.reduce(
         (acc, event) => {
           event.time = new Date(event.time);
           if (!acc.hasOwnProperty("all")) {
@@ -207,8 +208,21 @@ function connect(setEvents, setWs) {
         },
         // make a copy so react knows it changed
         { ...events }
-      )
-    );
+      );
+
+      return Object.keys(nextEvents).reduce((acc, key) => {
+        if (key === "all") {
+          acc[key] = nextEvents[key];
+        } else {
+          acc[key] = {
+            events: [...nextEvents[key].events],
+            last: nextEvents[key].last,
+          };
+        }
+
+        return acc;
+      }, {});
+    });
   };
 
   ws.onclose = () =>
