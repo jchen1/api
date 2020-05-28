@@ -1,6 +1,6 @@
 import * as log from "https://deno.land/std/log/mod.ts";
 
-import db from "./db/database.ts";
+import db, { fromDB } from "./db/database.ts";
 import wss from "./websocket.ts";
 import { Event, EventSource, EventType } from "./types.ts";
 
@@ -84,4 +84,76 @@ export async function sendEvent(
       time,
     },
   ]);
+}
+
+// when this function was created there were 4772 events in the last 12 hours, 9473 in 24
+export async function historicalEvents(
+  start: Date,
+  end = new Date(),
+  limit = 20000
+) {
+  const { rows } = await db.query(
+    `WITH 
+        events_with_minute AS 
+          (SELECT DATE_TRUNC('minute', ts) as minute, * from events), 
+        events_by_minute AS 
+          (SELECT 
+            minute, 
+            event,
+            source_major,
+            source_minor, 
+            type, 
+            CAST(AVG(data_int) OVER w AS INT) AS data_int, 
+            CAST(AVG(data_bigint)  OVER w AS BIGINT) AS data_bigint, 
+            AVG(data_real) OVER w AS data_real, 
+            FIRST_VALUE(data_text) OVER w AS data_text, 
+            FIRST_VALUE(data_json) OVER w AS data_json 
+          FROM events_with_minute WINDOW w AS (PARTITION BY event, minute)) 
+      SELECT 
+        minute AS ts,
+        event,
+        MIN(source_major) AS source_major, 
+        MIN(source_minor) AS source_minor, 
+        CAST(MIN(type) AS TEXT) as type, 
+        MIN(data_int) AS data_int, 
+        MIN(data_bigint) AS data_bigint, 
+        MIN(data_real) AS data_real, 
+        FIRST(data_text) AS data_text, 
+        FIRST(data_json) AS data_json 
+      FROM events_by_minute WHERE minute >= $1 AND minute <= $2
+      GROUP BY event, minute 
+      ORDER BY minute ASC
+      LIMIT $3;`,
+    start,
+    end,
+    limit
+  );
+
+  return rows
+    .map(
+      ([
+        ts,
+        event,
+        source_major,
+        source_minor,
+        type,
+        data_int,
+        data_bigint,
+        data_real,
+        data_text,
+        data_json,
+      ]) => ({
+        ts,
+        event,
+        source_major,
+        source_minor,
+        type,
+        data_int,
+        data_bigint,
+        data_real,
+        data_text,
+        data_json,
+      })
+    )
+    .map(fromDB);
 }

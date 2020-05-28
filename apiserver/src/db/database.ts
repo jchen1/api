@@ -1,5 +1,6 @@
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 import { Pool } from "https://deno.land/x/postgres@v0.4.1/mod.ts";
+
 import { DBEvent, Event } from "../types.ts";
 
 class Database {

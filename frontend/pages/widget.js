@@ -68,6 +68,10 @@ function LineWidget({ events, opts }) {
     forceUpdate();
   }, [events]);
 
+  if (events.length === 0) {
+    return <WidgetText>---</WidgetText>;
+  }
+
   // todo import scss colors
   return (
     <ResponsiveContainer width="100%" aspect={2}>
@@ -86,14 +90,12 @@ function LineWidget({ events, opts }) {
           scale="time"
           type="number"
           domain={xDomain || ["dataMin", "dataMax"]}
-          key={events.length}
         />
         <YAxis
           domain={yDomain || ["auto", "auto"]}
           tickFormatter={n => Math.round(n)}
           interval="preserveStartEnd"
           scale={scale || "auto"}
-          // key={events.length}
         />
         <Tooltip formatter={formatter} labelFormatter={dateToTime} />
       </LineChart>
