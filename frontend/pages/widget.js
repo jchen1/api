@@ -35,9 +35,14 @@ const WidgetWrapper = styled.div`
   }
 `;
 
-function TextWidget({ events }) {
+function TextWidget({ events, opts }) {
   const value = last(events, {}).data;
-  return <WidgetText>{value ? prettifyData(value) : "---"}</WidgetText>;
+  const formatter = opts.formatter || prettifyData;
+  if (opts.formatter) {
+    console.log("!!!", opts.title, events.length, last(events, {}));
+  }
+
+  return <WidgetText>{value ? formatter(value) : "---"}</WidgetText>;
 }
 
 function dateToHours(date) {
@@ -136,10 +141,38 @@ const types = {
     units: "%",
     display: "line",
   },
+  resting_heart_rate: {
+    title: "RHR",
+    units: "bpm",
+    display: "text",
+  },
+  strain: {
+    title: "Strain (0-21)",
+    display: "text",
+  },
+  sleep: {
+    title: "Sleep",
+    display: "text",
+    formatter: ({ duration, score, needs }) =>
+      `${score}: ${prettifyData(duration / 1000 / 60 / 60)} / ${prettifyData(
+        needs.total / 1000 / 60 / 60
+      )}`,
+  },
+  recovery: {
+    title: "Recovery (0-100)",
+    display: "text",
+  },
+  hrv: {
+    title: "HRV",
+    units: "ms",
+    display: "text",
+    formatter: data => prettifyData(data * 1000),
+  },
 };
 
 const widgetDisplays = {
   line: LineWidget,
+  text: TextWidget,
 };
 
 export const typeOrder = Object.keys(types);

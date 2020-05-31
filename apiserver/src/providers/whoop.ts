@@ -3,13 +3,19 @@ import * as log from "https://deno.land/std/log/mod.ts";
 
 import db from "../db/database.ts";
 import { sendEvents } from "../event.ts";
-import { ICronHandler, EventType } from "../types.ts";
+import { ICronHandler, EventType, Event } from "../types.ts";
+import { get } from "../util.ts";
 
 type Token = {
   user_id: number;
   access_token: string;
   expires_in: number;
   expires_at: Date;
+};
+
+const sportIdToName: Record<string, string> = {
+  "-1": "Other",
+  "35": "Track",
 };
 
 async function getToken(username: string, password: string) {
@@ -58,6 +64,140 @@ async function getHR(token: Token, start: Date, end = new Date(), step = 6) {
   );
 }
 
+async function getHREvents(token: Token, now: Date): Promise<Event[]> {
+  const { rows } = await db.query(
+    `SELECT ts FROM events WHERE event=$1 AND source_major=$2 ORDER BY ts DESC LIMIT 1;`,
+    "hr",
+    "whoop"
+  );
+
+  const start =
+    rows.length > 0
+      ? new Date(rows[0][0].getTime() + 1000)
+      : new Date(now.getTime() - 1000 * 60 * 60 * 24);
+
+  const { values } = await getHR(token, start);
+  const events = values.map((metric: any) => ({
+    event: "hr",
+    source: { major: "whoop", minor: "api" },
+    type: EventType.Int,
+    data: metric.data,
+    time: new Date(metric.time),
+  }));
+
+  return events.slice(0, 5000);
+}
+
+async function getCycleEvents(token: Token, now: Date): Promise<Event[]> {
+  const { rows } = await db.query(
+    `SELECT ts FROM EVENTS WHERE event=$1 AND source_major=$2 ORDER BY ts DESC LIMIT 1;`,
+    // doesn't really matter: we only import when all states are `complete`
+    "strain",
+    "whoop"
+  );
+
+  const start =
+    rows.length > 0
+      ? new Date(rows[0][0].getTime() + 1000)
+      : new Date(now.getTime() - 1000 * 60 * 60 * 24 * 14);
+  const cycles = await getCycles(token, start);
+
+  const events = cycles.flatMap((cycle: any) => {
+    const { days, during, recovery, sleep, strain } = cycle;
+    if (days.length !== 1) {
+      log.warning(
+        `whoop: cycle with more than one day, ignoring...\n${JSON.stringify(
+          cycle,
+          null,
+          2
+        )}`
+      );
+      return [];
+    }
+
+    // hack: if no workout was recorded, strain status is `null`
+    if (strain.workouts.length === 0) {
+      strain.state = "complete";
+    }
+
+    const eventDay = new Date(
+      new Date(days[0]).getTime() + new Date().getTimezoneOffset() * 60 * 1000
+    );
+    const states = [recovery, strain, sleep].map(x => get(x, "state"));
+    if (
+      !states.every(s => s === "complete") ||
+      eventDay.toDateString() === new Date().toDateString()
+    ) {
+      log.info(`whoop: ignoring incomplete cycle for date ${eventDay}`);
+      return [];
+    }
+
+    const recoveryEvents = [
+      {
+        event: "hrv",
+        type: EventType.Real,
+        data: recovery.heartRateVariabilityRmssd,
+      },
+      {
+        event: "resting_heart_rate",
+        type: EventType.Int,
+        data: recovery.restingHeartRate,
+      },
+      {
+        event: "recovery",
+        type: EventType.Int,
+        data: recovery.score,
+      },
+    ].map(e => ({ time: new Date(recovery.timestamp), ...e }));
+
+    // potential todo: individual sleeps (sleep.sleeps)
+    const sleepEvents = [
+      {
+        event: "sleep",
+        type: EventType.Json,
+        data: {
+          duration: sleep.qualityDuration,
+          score: sleep.score,
+          needs: sleep.needBreakdown,
+        },
+      },
+    ];
+
+    const strainEvents = [
+      {
+        event: "strain",
+        type: EventType.Real,
+        data: strain.score,
+      },
+    ].concat(
+      strain.workouts.flatMap((workout: any) => ({
+        event: "workout",
+        type: EventType.Json,
+        data: {
+          strain: workout.score,
+          duration:
+            new Date(workout.during.upper).getTime() -
+            new Date(workout.during.lower).getTime(),
+          averageHeartRate: workout.averageHeartRate,
+          sportId: workout.sportId,
+          sport: get(sportIdToName, `${workout.sportId}`, "Other"),
+        },
+        time: new Date(workout.during.lower),
+      }))
+    );
+
+    const events = (recoveryEvents as any).concat(sleepEvents, strainEvents);
+
+    return events.map((e: any) => ({
+      time: eventDay,
+      source: { major: "whoop", minor: "api" },
+      ...e,
+    }));
+  });
+
+  return events;
+}
+
 class Whoop implements ICronHandler {
   username?: string;
   password?: string;
@@ -89,38 +229,27 @@ class Whoop implements ICronHandler {
     if (!this.token) {
       return;
     }
-    const now = Date.now();
-    if (now - this.token.expires_at.valueOf() < 60 * 1000) {
+    const now = new Date();
+    if (now.getTime() - this.token.expires_at.getTime() < 60 * 1000) {
       await this.updateToken();
     }
 
-    const { rows } = await db.query(
-      `SELECT ts FROM events WHERE event=$1 AND source_major=$2 ORDER BY ts DESC LIMIT 1;`,
-      "hr",
-      "whoop"
-    );
+    const hrEvents = await getHREvents(this.token, now);
+    const cycleEvents = await getCycleEvents(this.token, now);
 
-    if (rows.length > 0 && !rows[0][0].getTime) {
-      log.warning(`whoop: strange query: ${rows[0]}`);
-    }
-
-    const start =
-      rows.length > 0
-        ? new Date(rows[0][0].getTime() + 1000)
-        : new Date(now - 1000 * 60 * 60 * 24);
-
-    const { values } = await getHR(this.token, start);
-    const events = values.map((metric: any) => ({
-      event: "hr",
-      source: { major: "whoop", minor: "api" },
-      type: EventType.Int,
-      data: metric.data,
-      time: new Date(metric.time),
-    }));
+    const events = hrEvents.concat(cycleEvents);
 
     await sendEvents(events);
 
-    log.info(`whoop: ingested ${values.length} events starting from ${start}`);
+    if (events.length > 0) {
+      log.info(
+        `whoop: ingested ${events.length} events starting from ${
+          events.sort((a, b) => a.time.getTime() - b.time.getTime())[0].time
+        }`
+      );
+    } else {
+      log.info(`whoop: ingested 0 events`);
+    }
   }
 }
 

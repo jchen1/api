@@ -94,8 +94,12 @@ function connect(setEvents, setWs) {
     setEvents(events => {
       const nextEvents = response.events.reduce(
         (acc, event) => {
+          if (event.event === "sleep") {
+            console.log(event);
+          }
           if (event.event === "all" || event.event === "keys") {
             console.warn(`unsupported event type ${event.event}, skipping`);
+            return acc;
           }
           event.time = new Date(event.time);
           if (!acc.hasOwnProperty("all")) {
@@ -113,14 +117,16 @@ function connect(setEvents, setWs) {
             if (!acc.hasOwnProperty(event.event)) {
               acc[event.event] = { events: [], last: [] };
             }
+            if (["int", "bigint", "real"].includes(event.type)) {
+              acc[event.event].last.push(event);
+              acc[event.event].last = acc[event.event].last.filter(
+                e => event.time.getTime() - e.time.getTime() < 1000 * 60 * 15
+              );
 
-            acc[event.event].last.push(event);
-            acc[event.event].last = acc[event.event].last.filter(
-              e => event.time.getTime() - e.time.getTime() < 1000 * 60 * 15
-            );
-            event.dataAvg =
-              acc[event.event].last.reduce((s, e) => s + e.data, 0) /
-              Math.max(1, acc[event.event].last.length);
+              event.dataAvg =
+                acc[event.event].last.reduce((s, e) => s + e.data, 0) /
+                Math.max(1, acc[event.event].last.length);
+            }
 
             acc[event.event].events.push(event);
           }
