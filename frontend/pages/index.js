@@ -94,9 +94,6 @@ function connect(setEvents, setWs) {
     setEvents(events => {
       const nextEvents = response.events.reduce(
         (acc, event) => {
-          if (event.event === "sleep") {
-            console.log(event);
-          }
           if (event.event === "all" || event.event === "keys") {
             console.warn(`unsupported event type ${event.event}, skipping`);
             return acc;
