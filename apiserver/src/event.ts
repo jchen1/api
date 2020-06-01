@@ -32,7 +32,7 @@ export async function sendEvents(events: Event[]) {
         );
       })
       .join(",") +
-    " ON CONFLICT ON CONSTRAINT events_pkey DO UPDATE SET (type, data_int, data_bigint, data_real, data_text, data_json) = (EXCLUDED.type, EXCLUDED.data_int, EXCLUDED.data_bigint, EXCLUDED.data_real, EXCLUDED.data_text, EXCLUDED.data_json);";
+    " ON CONFLICT DO UPDATE SET (type, data_int, data_bigint, data_real, data_text, data_json) = (EXCLUDED.type, EXCLUDED.data_int, EXCLUDED.data_bigint, EXCLUDED.data_real, EXCLUDED.data_text, EXCLUDED.data_json);";
 
   const promise = db.query({
     text: query,
