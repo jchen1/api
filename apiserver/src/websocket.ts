@@ -31,7 +31,7 @@ class WSSServer {
       const now = String(Date.now());
       this.connections[now] = ws;
       log.info(
-        `new wss connection: ${Object.keys(this.connections).length} active`
+        `new wss connection: ${Object.keys(this.connections).length} active`,
       );
 
       ws.on("close", () => {
@@ -39,27 +39,31 @@ class WSSServer {
         log.info(
           `wss connection dropped: ${
             Object.keys(this.connections).length
-          } active`
+          } active`,
         );
       });
 
       ws.on("message", async (msg: string) => {
-        const parsed = JSON.parse(msg);
-        if (parsed.type === "connect" || parsed.type === "historical") {
-          const hours = Math.min(48, parsed.hours || 12);
-          const startTime = new Date(Date.now() - 1000 * 60 * 60 * hours);
-          // 12 hours
-          const events = await historicalEvents(startTime);
-          return this.sendEvents(events);
-        } else if (parsed.type === "reconnect") {
-          // meh
-        } else if (parsed.type === "message") {
-          sendEvent(
-            "user_msg",
-            { major: "wss", minor: now },
-            EventType.Text,
-            parsed.message
-          );
+        try {
+          const parsed = JSON.parse(msg);
+          if (parsed.type === "connect" || parsed.type === "historical") {
+            const hours = Math.min(48, parsed.hours || 12);
+            const startTime = new Date(Date.now() - 1000 * 60 * 60 * hours);
+            // 12 hours
+            const events = await historicalEvents(startTime);
+            return this.sendEvents(events);
+          } else if (parsed.type === "reconnect") {
+            // meh
+          } else if (parsed.type === "message") {
+            sendEvent(
+              "user_msg",
+              { major: "wss", minor: now },
+              EventType.Text,
+              parsed.message,
+            );
+          }
+        } catch (err) {
+          log.error(err);
         }
       });
     });
@@ -69,20 +73,19 @@ class WSSServer {
 
   async sendEvents(events: Event[]) {
     const message = {
-      events: events.map(event => ({
+      events: events.map((event) => ({
         ...event,
-        data:
-          filters.events.includes(event.event) ||
+        data: filters.events.includes(event.event) ||
           filters.sources.includes(event.source.major)
-            ? "hidden"
-            : event.data,
+          ? "hidden"
+          : event.data,
       })),
     };
 
     const json = JSON.stringify(message);
 
     return Promise.allSettled(
-      Object.values(this.connections).map(ws => ws.send(json))
+      Object.values(this.connections).map((ws) => ws.send(json)),
     );
   }
 }
