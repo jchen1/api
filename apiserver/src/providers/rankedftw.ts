@@ -1,7 +1,6 @@
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 import * as log from "https://deno.land/std/log/mod.ts";
 
-import db from "../db/database.ts";
 import { sendEvents } from "../event.ts";
 import { ICronHandler, EventType, Event } from "../types.ts";
 
