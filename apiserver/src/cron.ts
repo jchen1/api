@@ -15,20 +15,25 @@ const jobs: Record<string, ICronHandler> = {
   whoop,
 };
 
+async function run(name: string) {
+  const worker = jobs[name];
+  const start = new Date();
+  log.info(`${start.toString()}: Starting job ${name}`);
+  try {
+    await worker.handler();
+    const end = new Date();
+    log.info(
+      `${end}: Finished job ${name} in ${end.getTime() - start.getTime()}ms`,
+    );
+  } catch (err) {
+    log.error(`${new Date().toString()}: Job ${name} failed!\n${err.stack}`);
+  }
+}
+
 for (const name in jobs) {
   const worker = jobs[name];
   cron.add(worker.schedule, async () => {
-    const start = new Date();
-    log.info(`${start.toString()}: Starting job ${name}`);
-    try {
-      await worker.handler();
-      const end = new Date();
-      log.info(
-        `${end}: Finished job ${name} in ${end.getTime() - start.getTime()}ms`,
-      );
-    } catch (err) {
-      log.error(`${new Date().toString()}: Job ${name} failed!\n${err.stack}`);
-    }
+    await run(name);
   });
 }
 
@@ -40,6 +45,9 @@ async function init() {
 
 export async function start() {
   await init();
+  for (const name in jobs) {
+    await run(name);
+  }
   cron.start();
 }
 
