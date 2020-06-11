@@ -40,7 +40,7 @@ const leagues = [
 ];
 
 function getLeague(data: LeagueData) {
-  return `${leagues[data.league]} ${data.tier - 1}`;
+  return `${leagues[data.league]} ${data.tier + 1}`;
 }
 
 async function getTeamData(team: string) {
