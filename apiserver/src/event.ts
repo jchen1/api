@@ -2,14 +2,14 @@ import * as log from "https://deno.land/std/log/mod.ts";
 
 import db, { fromDB } from "./db/database.ts";
 import wss from "./websocket.ts";
-import { Event, EventSource, EventType } from "./types.ts";
+import { Event, EventSource, EventType, EventsQueryOpts } from "./types.ts";
 
 export async function sendEvents(events: Event[]) {
   if (events.length === 0) {
     return;
   }
 
-  const typedEvents = events.map(event => {
+  const typedEvents = events.map((event) => {
     const data = event.data;
 
     return {
@@ -28,7 +28,8 @@ export async function sendEvents(events: Event[]) {
       .map((_, idx) => {
         const start = 1 + idx * 10;
         return (
-          "(" + [...Array(10).keys()].map(n => `$${start + n}`).join(",") + ")"
+          "(" + [...Array(10).keys()].map((n) => `$${start + n}`).join(",") +
+          ")"
         );
       })
       .join(",") +
@@ -36,7 +37,7 @@ export async function sendEvents(events: Event[]) {
 
   const promise = db.query({
     text: query,
-    args: typedEvents.flatMap(e => [
+    args: typedEvents.flatMap((e) => [
       e.time,
       e.event,
       e.source.major,
@@ -51,16 +52,14 @@ export async function sendEvents(events: Event[]) {
   });
 
   // this could fail and that's ok!
-  wss.sendEvents(events).then(results => {
+  wss.sendEvents(events).then((results) => {
     if (results.length > 0) {
       log.info(
-        `sent ${events.length} events to ${
-          results.length
-        } active websocket connections: ${
-          results.filter(r => r.status === "fulfilled").length
+        `sent ${events.length} events to ${results.length} active websocket connections: ${
+          results.filter((r) => r.status === "fulfilled").length
         } succeeded, ${
-          results.filter(r => r.status === "rejected").length
-        } failed`
+          results.filter((r) => r.status === "rejected").length
+        } failed`,
       );
     }
   });
@@ -73,7 +72,7 @@ export async function sendEvent(
   source: EventSource,
   type: EventType,
   data: any,
-  time = new Date()
+  time = new Date(),
 ) {
   return await sendEvents([
     {
@@ -90,43 +89,60 @@ export async function sendEvent(
 export async function historicalEvents(
   start: Date,
   end = new Date(),
-  limit = 20000
+  opts: EventsQueryOpts = {},
 ) {
+  const limit = opts.limit || 20000;
+  const period = opts.period || "minute";
+  const include = (opts.include || []).filter((s) => s !== "");
+
+  const includeQuery = include.length > 0
+    ? `WHERE event IN (${include.map((i) => `'${i}'`).join(", ")})`
+    : "";
+
+  const query = `
+  WITH
+  events_with_period AS
+    (SELECT 
+      DATE_TRUNC('${period}', ts) as period, 
+      *
+    FROM events
+    ${includeQuery}),
+  events_by_period AS
+    (SELECT
+      period,
+      event,
+      source_major,
+      source_minor,
+      type,
+      CAST(AVG(data_int) OVER w AS INT) AS data_int,
+      CAST(AVG(data_bigint) OVER w AS BIGINT) AS data_bigint,
+      AVG(data_real) OVER w AS data_real,
+      FIRST_VALUE(data_text) OVER w AS data_text,
+      FIRST_VALUE(data_json) OVER w AS data_json
+    FROM events_with_period
+    WHERE period >= $1 AND period <= $2
+    WINDOW w AS (PARTITION BY event, period))
+SELECT
+period AS ts,
+  event,
+  MIN(source_major) AS source_major,
+  MIN(source_minor) AS source_minor,
+  CAST(MIN(type) AS TEXT) as type,
+  MIN(data_int) AS data_int,
+  MIN(data_bigint) AS data_bigint,
+  MIN(data_real) AS data_real,
+  FIRST(data_text) AS data_text,
+  FIRST(data_json) AS data_json
+FROM events_by_period
+GROUP BY event, period
+ORDER BY period ASC
+LIMIT $3;`;
+
   const { rows } = await db.query(
-    `WITH 
-        events_with_minute AS 
-          (SELECT DATE_TRUNC('minute', ts) as minute, * from events), 
-        events_by_minute AS 
-          (SELECT 
-            minute, 
-            event,
-            source_major,
-            source_minor, 
-            type, 
-            CAST(AVG(data_int) OVER w AS INT) AS data_int, 
-            CAST(AVG(data_bigint)  OVER w AS BIGINT) AS data_bigint, 
-            AVG(data_real) OVER w AS data_real, 
-            FIRST_VALUE(data_text) OVER w AS data_text, 
-            FIRST_VALUE(data_json) OVER w AS data_json 
-          FROM events_with_minute WINDOW w AS (PARTITION BY event, minute)) 
-      SELECT 
-        minute AS ts,
-        event,
-        MIN(source_major) AS source_major, 
-        MIN(source_minor) AS source_minor, 
-        CAST(MIN(type) AS TEXT) as type, 
-        MIN(data_int) AS data_int, 
-        MIN(data_bigint) AS data_bigint, 
-        MIN(data_real) AS data_real, 
-        FIRST(data_text) AS data_text, 
-        FIRST(data_json) AS data_json 
-      FROM events_by_minute WHERE minute >= $1 AND minute <= $2
-      GROUP BY event, minute 
-      ORDER BY minute ASC
-      LIMIT $3;`,
+    query,
     start,
     end,
-    limit
+    limit,
   );
 
   return rows
@@ -153,7 +169,7 @@ export async function historicalEvents(
         data_real,
         data_text,
         data_json,
-      })
+      }),
     )
     .map(fromDB);
 }

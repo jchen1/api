@@ -1,5 +1,9 @@
 import { config } from "https://deno.land/x/dotenv/mod.ts";
-import { Application, Middleware, send } from "https://deno.land/x/oak/mod.ts";
+import {
+  Application,
+  Middleware,
+  send,
+} from "https://deno.land/x/oak@v5.2.0/mod.ts";
 import * as log from "https://deno.land/std/log/mod.ts";
 
 import cron from "./cron.ts";
@@ -26,9 +30,9 @@ const notFound: Middleware = ({ response }) => {
 const logger: Middleware = async ({ request, response }, next) => {
   await next();
   log.info(
-    `${new Date().toString()}: ${request.method} ${request.url} - ${
-      response.status
-    }`
+    `${
+      new Date().toString()
+    }: ${request.method} ${request.url} - ${response.status}`,
   );
 };
 
@@ -38,7 +42,7 @@ app.use(errorHandler);
 app.use(logger);
 app.use(router.routes());
 // app.use(router.allowedMethods());
-app.use(async context => {
+app.use(async (context) => {
   await send(context, context.request.url.pathname, {
     root: config().NEXTJS_EXPORT_DIR,
     index: "index.html",
@@ -49,10 +53,10 @@ app.use(notFound);
 const port = parseInt(config().APP_PORT || "9000");
 const httpsOptions = config().ENABLE_HTTPS
   ? {
-      secure: true,
-      certFile: config().HTTPS_CERT_FILE,
-      keyFile: config().HTTPS_KEY_FILE,
-    }
+    secure: true,
+    certFile: config().HTTPS_CERT_FILE,
+    keyFile: config().HTTPS_KEY_FILE,
+  }
   : {};
 const server = app.listen({ port, ...httpsOptions });
 log.info(`Webserver started on port ${port}`);

@@ -37,3 +37,17 @@ export interface ICronHandler {
   handler: () => void | Promise<void>;
   init: () => void | Promise<void>;
 }
+
+export enum QueryPeriodType {
+  Minute = "minute",
+  Hour = "hour",
+  Day = "day",
+  Month = "month",
+  Year = "year",
+}
+
+export type EventsQueryOpts = {
+  limit?: number;
+  period?: QueryPeriodType;
+  include?: string[];
+};
