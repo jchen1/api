@@ -43,7 +43,7 @@ app.use(logger);
 app.use(router.routes());
 // app.use(router.allowedMethods());
 app.use(async (context) => {
-  if (!context.response.status) {
+  if (context.response.status === 404) {
     await send(context, context.request.url.pathname, {
       root: config().NEXTJS_EXPORT_DIR,
       index: "index.html",
