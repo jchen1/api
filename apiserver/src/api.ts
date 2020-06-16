@@ -1,6 +1,7 @@
+import * as log from "https://deno.land/std/log/mod.ts";
 import { Middleware, helpers } from "https://deno.land/x/oak@v5.2.0/mod.ts";
 
-import { historicalEvents, sendEvent } from "./event.ts";
+import { historicalEvents, sendEvents } from "./event.ts";
 import { EventsQueryOpts, EventType, QueryPeriodType } from "./types.ts";
 
 export const getEvents: Middleware = async (context) => {
@@ -32,7 +33,7 @@ export const getEvents: Middleware = async (context) => {
   response.body = events;
 };
 
-export const postEvent: Middleware = async ({ request, response }) => {
+export const postEvents: Middleware = async ({ request, response }) => {
   if (!request.hasBody) {
     response.status = 400;
     response.body = "missing body";
@@ -46,40 +47,66 @@ export const postEvent: Middleware = async ({ request, response }) => {
     return;
   }
 
-  const { source, event, type, data } = body.value;
-  if (!source) {
-    response.status = 400;
-    response.body = "missing data";
+  const val = body.value;
+  const events = [];
+
+  if (!Array.isArray(val)) {
+    events.push(val);
+  } else {
+    events.push(...val);
+  }
+
+  // validate
+  events.forEach((evt) => {
+    const { source, event, type, data } = evt;
+    if (!source) {
+      response.status = 400;
+      response.body = "missing data";
+      return;
+    }
+
+    const { major, minor } = source;
+
+    if (!major || !minor || !type || !data || !event) {
+      response.status = 400;
+      response.body = "missing data";
+      return;
+    }
+
+    if (!Object.values(EventType).includes(type)) {
+      response.status = 400;
+      response.body = "bad type";
+      return;
+    }
+  });
+
+  if (response.status === 400) {
     return;
   }
 
-  const { major, minor } = source;
+  // send
+  try {
+    await sendEvents(events.map((e) => {
+      const { source, event, type, data } = e;
+      return {
+        source,
+        event,
+        type,
+        data,
+        time: e.ts
+          ? new Date(
+            body.value.ts > 9999999999 ? body.value.ts : body.value.ts * 1000,
+          )
+          : new Date(),
+      };
+    }));
 
-  if (!major || !minor || !type || !data || !event) {
-    response.status = 400;
-    response.body = "missing data";
-    return;
+    log.info(`api: ingested ${events.length} events`);
+
+    response.status = 200;
+    response.body = "ok";
+  } catch (e) {
+    response.status = 500;
+    throw e;
   }
-
-  if (!Object.values(EventType).includes(type)) {
-    response.status = 400;
-    response.body = "bad type";
-    return;
-  }
-
-  await sendEvent(
-    event,
-    { major, minor },
-    type,
-    data,
-    // support unix timestamps & js timestamps
-    body.value.ts
-      ? new Date(
-        body.value.ts > 9999999999 ? body.value.ts : body.value.ts * 1000,
-      )
-      : new Date(),
-  );
-
-  response.status = 200;
-  response.body = "ok";
 };
