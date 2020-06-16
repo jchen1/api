@@ -95,7 +95,7 @@ export const postEvents: Middleware = async ({ request, response }) => {
         data,
         time: e.ts
           ? new Date(
-            body.value.ts > 9999999999 ? body.value.ts : body.value.ts * 1000,
+            e.ts > 9999999999 ? e.ts : e.ts * 1000,
           )
           : new Date(),
       };
