@@ -9,7 +9,7 @@ const router = new Router();
 router
   .options("/", oakCors())
   .options("/events", oakCors())
-  .get("/events", oakCors(), authMiddleware, getEvents)
+  .get("/events", oakCors(), getEvents)
   .post("/", oakCors(), authMiddleware, postEvents);
 
 export default router;
