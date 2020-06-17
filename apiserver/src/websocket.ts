@@ -9,6 +9,11 @@ import {
 import { historicalEvents, sendEvent } from "./event.ts";
 import { Event, EventType } from "./types.ts";
 
+type WSConnection = {
+  ws: WebSocket;
+  eventFilter: string[] | "all";
+};
+
 const filters = {
   events: ["visited_url", "switched_tab"],
   sources: ["chrome-extension"],
@@ -18,7 +23,7 @@ const filters = {
 // todo gzip
 class WSSServer {
   wss: WebSocketServer;
-  connections: Record<string, WebSocket>;
+  connections: Record<string, WSConnection>;
 
   constructor() {
     const port = parseInt(config().APP_PORT || "9000");
@@ -29,7 +34,7 @@ class WSSServer {
 
     this.wss.on("connection", async (ws: WebSocket) => {
       const now = String(Date.now());
-      this.connections[now] = ws;
+      this.connections[now] = { ws, eventFilter: "all" };
       log.info(
         `new wss connection: ${Object.keys(this.connections).length} active`,
       );
@@ -47,6 +52,12 @@ class WSSServer {
         try {
           const parsed = JSON.parse(msg);
           if (parsed.type === "connect" || parsed.type === "historical") {
+            if (
+              parsed.eventFilter === "all" ||
+              Array.isArray(parsed.eventFilter)
+            ) {
+              this.connections[now].eventFilter = parsed.eventFilter;
+            }
             const hours = Math.min(48, parsed.hours || 12);
             const startTime = new Date(Date.now() - 1000 * 60 * 60 * hours);
             // 12 hours
@@ -72,20 +83,21 @@ class WSSServer {
   }
 
   async sendEvents(events: Event[]) {
-    const message = {
-      events: events.map((event) => ({
-        ...event,
-        data: filters.events.includes(event.event) ||
-          filters.sources.includes(event.source.major)
-          ? "hidden"
-          : event.data,
-      })),
-    };
-
-    const json = JSON.stringify(message);
+    const maskedEvents = events.map((event) => ({
+      ...event,
+      data: filters.events.includes(event.event) ||
+        filters.sources.includes(event.source.major)
+        ? "hidden"
+        : event.data,
+    }));
 
     return Promise.allSettled(
-      Object.values(this.connections).map((ws) => ws.send(json)),
+      Object.values(this.connections).map(({ ws, eventFilter }) => {
+        const eventsToSend = maskedEvents.filter(({ event }) =>
+          eventFilter === "all" || eventFilter.includes(event)
+        );
+        ws.send(JSON.stringify(eventsToSend));
+      }),
     );
   }
 }
