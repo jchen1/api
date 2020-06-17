@@ -41,15 +41,7 @@ await db.connect();
 app.use(errorHandler);
 app.use(logger);
 app.use(router.routes());
-// app.use(router.allowedMethods());
-app.use(async (context) => {
-  if (context.response.status === 404) {
-    await send(context, context.request.url.pathname, {
-      root: config().NEXTJS_EXPORT_DIR,
-      index: "index.html",
-    });
-  }
-});
+app.use(router.allowedMethods());
 app.use(notFound);
 
 const port = parseInt(config().APP_PORT || "9000");
