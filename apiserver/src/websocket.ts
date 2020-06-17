@@ -96,7 +96,7 @@ class WSSServer {
         const eventsToSend = maskedEvents.filter(({ event }) =>
           eventFilter === "all" || eventFilter.includes(event)
         );
-        ws.send(JSON.stringify(eventsToSend));
+        ws.send(JSON.stringify({ events: eventsToSend }));
       }),
     );
   }
