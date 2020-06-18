@@ -1,7 +1,7 @@
 import * as log from "https://deno.land/std/log/mod.ts";
 import { Middleware, helpers } from "https://deno.land/x/oak@v5.2.0/mod.ts";
 
-import { historicalEvents, sendEvents } from "./event.ts";
+import { historicalEvents, sendEvents, maskEvents } from "./event.ts";
 import { EventsQueryOpts, EventType, QueryPeriodType } from "./types.ts";
 
 export const getEvents: Middleware = async (context) => {
@@ -30,7 +30,7 @@ export const getEvents: Middleware = async (context) => {
   const events = await historicalEvents(start, end, opts);
 
   response.status = 200;
-  response.body = events;
+  response.body = maskEvents(events);
 };
 
 export const postEvents: Middleware = async ({ request, response }) => {

@@ -6,17 +6,12 @@ import {
   WebSocketServer,
 } from "https://deno.land/x/websocket/mod.ts";
 
-import { historicalEvents, sendEvent } from "./event.ts";
+import { historicalEvents, sendEvent, maskEvents } from "./event.ts";
 import { Event, EventType } from "./types.ts";
 
 type WSConnection = {
   ws: WebSocket;
   eventFilter: string[] | "all";
-};
-
-const filters = {
-  events: ["visited_url", "switched_tab"],
-  sources: ["chrome-extension"],
 };
 
 // todo somehow get SSL enabled...
@@ -83,17 +78,9 @@ class WSSServer {
   }
 
   async sendEvents(events: Event[]) {
-    const maskedEvents = events.map((event) => ({
-      ...event,
-      data: filters.events.includes(event.event) ||
-        filters.sources.includes(event.source.major)
-        ? "hidden"
-        : event.data,
-    }));
-
     return Promise.allSettled(
       Object.values(this.connections).map(({ ws, eventFilter }) => {
-        const eventsToSend = maskedEvents.filter(({ event }) =>
+        const eventsToSend = maskEvents(events).filter(({ event }) =>
           eventFilter === "all" || eventFilter.includes(event)
         );
         ws.send(JSON.stringify({ events: eventsToSend }));
