@@ -10,6 +10,10 @@ router
   .options("/", oakCors())
   .options("/events", oakCors())
   .get("/events", oakCors(), getEvents)
+  .get("/", oakCors(), async ({ response }) => {
+    response.status = 301;
+    response.headers.set("Location", "https://jeffchen.dev/metrics");
+  })
   .post("/", oakCors(), authMiddleware, postEvents);
 
 export default router;
