@@ -46,18 +46,13 @@ class WSSServer {
       ws.on("message", async (msg: string) => {
         try {
           const parsed = JSON.parse(msg);
-          if (parsed.type === "connect" || parsed.type === "historical") {
+          if (parsed.type === "connect") {
             if (
               parsed.eventFilter === "all" ||
               Array.isArray(parsed.eventFilter)
             ) {
               this.connections[now].eventFilter = parsed.eventFilter;
             }
-            const hours = Math.min(48, parsed.hours || 12);
-            const startTime = new Date(Date.now() - 1000 * 60 * 60 * hours);
-            // 12 hours
-            const events = await historicalEvents(startTime);
-            return this.sendEvents(events);
           } else if (parsed.type === "reconnect") {
             // meh
           } else if (parsed.type === "message") {
