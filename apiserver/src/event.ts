@@ -176,7 +176,7 @@ LIMIT $3;`;
 
 const filters = {
   events: ["visited_url", "switched_tab"],
-  sources: ["chrome-extension"],
+  sources: ["chrome-extension", "hammerspoon"],
 };
 
 export function maskEvents(events: Event[]) {

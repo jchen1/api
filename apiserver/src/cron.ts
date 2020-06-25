@@ -2,6 +2,7 @@ import * as log from "https://deno.land/std/log/mod.ts";
 import { Cron } from "https://deno.land/x/crontab/cron.ts";
 
 import awair from "./providers/awair.ts";
+import github from "./providers/github.ts";
 import rankedftw from "./providers/rankedftw.ts";
 import whoop from "./providers/whoop.ts";
 
@@ -11,6 +12,7 @@ const cron = new Cron();
 
 const jobs: Record<string, ICronHandler> = {
   awair,
+  github,
   rankedftw,
   whoop,
 };
