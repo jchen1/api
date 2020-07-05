@@ -19,12 +19,17 @@ export type Event = {
   time: Date;
 };
 
+export type AggregatedEvent = Event & {
+  count: number;
+};
+
 export type DBEvent = {
   event: string;
   source_major: string;
   source_minor: string;
   type: EventType;
   ts: Date;
+  count?: number;
   data_int?: number;
   data_bigint?: number;
   data_real?: number;

@@ -114,6 +114,7 @@ export async function historicalEvents(
       source_major,
       source_minor,
       type,
+      COUNT(*) OVER w AS count,
       CAST(AVG(data_int) OVER w AS INT) AS data_int,
       CAST(AVG(data_bigint) OVER w AS BIGINT) AS data_bigint,
       AVG(data_real) OVER w AS data_real,
@@ -123,11 +124,12 @@ export async function historicalEvents(
     WHERE period >= $1 AND period <= $2
     WINDOW w AS (PARTITION BY event, period))
 SELECT
-period AS ts,
+  period AS ts,
   event,
   MIN(source_major) AS source_major,
   MIN(source_minor) AS source_minor,
   CAST(MIN(type) AS TEXT) as type,
+  MIN(count) AS count,
   MIN(data_int) AS data_int,
   MIN(data_bigint) AS data_bigint,
   MIN(data_real) AS data_real,
@@ -153,6 +155,7 @@ LIMIT $3;`;
         source_major,
         source_minor,
         type,
+        count,
         data_int,
         data_bigint,
         data_real,
@@ -164,6 +167,7 @@ LIMIT $3;`;
         source_major,
         source_minor,
         type,
+        count,
         data_int,
         data_bigint,
         data_real,

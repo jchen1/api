@@ -1,7 +1,7 @@
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 import { Pool } from "https://deno.land/x/postgres@v0.4.1/mod.ts";
 
-import { DBEvent, Event } from "../types.ts";
+import { AggregatedEvent, DBEvent, Event } from "../types.ts";
 
 class Database {
   client: Pool;
@@ -20,15 +20,16 @@ class Database {
         port,
         password,
       },
-      50
+      50,
     );
   }
 }
 
-export function fromDB(e: DBEvent): Event {
+export function fromDB(e: DBEvent): AggregatedEvent {
   return {
     event: e.event,
     source: { major: e.source_major, minor: e.source_minor },
+    count: e.count || 0,
     type: e.type,
     time: new Date(e.ts),
     data: (e as any)[`data_${e.type}`],
