@@ -36,6 +36,7 @@ Environment=HOME=/root
 WorkingDirectory=/root/api
 ExecStart=/root/.deno/bin/deno run --allow-read --allow-env --allow-net apiserver/src/index.ts
 Restart=always
+RuntimeMaxSec=86400
 LimitNOFILE=1048576
 LimitNPROC=1048576
 
