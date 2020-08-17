@@ -32,7 +32,9 @@ const logger: Middleware = async ({ request, response }, next) => {
   log.info(
     `${
       new Date().toString()
-    }: ${request.method} ${request.url} - ${response.status}`,
+    }: ${request.method} ${request.url} - ${response.status} ${
+      response.status === 400 ? String(response.body) : ""
+    }`,
   );
 };
 

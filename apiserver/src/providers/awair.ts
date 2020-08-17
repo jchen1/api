@@ -56,6 +56,10 @@ async function getRawData(
     );
   }
 
+  if (!result.data) {
+    throw new Error(`awair bad response: ${JSON.stringify(result, null, 2)}`);
+  }
+
   return result;
 }
 
