@@ -15,16 +15,16 @@ const baseUrl = "https://developer-apis.awair.is/v1/users/self/devices";
 async function api(token: string, url: string) {
   return fetch(`${baseUrl}${url}`, {
     headers: { Authorization: `Bearer ${token}` },
-  }).then(res => res.json());
+  }).then((res) => res.json());
 }
 
 async function getDevices(token: string): Promise<Device[]> {
-  return await api(token, "").then(res =>
+  return await api(token, "").then((res) =>
     res.devices.map(
       ({ deviceId, deviceType }: { deviceId: number; deviceType: string }) => ({
         id: deviceId,
         type: deviceType,
-      })
+      }),
     )
   );
 }
@@ -35,14 +35,27 @@ async function getRawData(
   start: Date,
   end = new Date(),
   desc = false,
-  fahrenheit = true
-) {
-  return await api(
+  fahrenheit = true,
+): Promise<any> {
+  const result = await api(
     token,
-    `/${device.type}/${
-      device.id
-    }/air-data/raw?from=${start.toISOString()}&to=${end.toISOString()}&limit=360&desc=${desc}&fahrenheit=${fahrenheit}`
+    `/${device.type}/${device.id}/air-data/raw?from=${start.toISOString()}&to=${end.toISOString()}&limit=360&desc=${desc}&fahrenheit=${fahrenheit}`,
   );
+
+  if (
+    result.data.length === 0 && end.getTime() - start.getTime() > 1000 * 60 * 60
+  ) {
+    return getRawData(
+      token,
+      device,
+      new Date(start.getTime() + 1000 * 60 * 60),
+      end,
+      desc,
+      fahrenheit,
+    );
+  }
+
+  return result;
 }
 
 function deviceId(d: Device) {
@@ -83,7 +96,7 @@ class Awair implements ICronHandler {
     const { rows } = await db.query(
       `SELECT source_minor, MAX(ts) FROM events WHERE source_major=$1 AND source_minor = ANY($2::text[]) GROUP BY source_minor;`,
       "awair",
-      this.devices.map(deviceId)
+      this.devices.map(deviceId),
     );
 
     const deviceToLastIngest = rows.reduce((acc, row) => {
@@ -95,11 +108,11 @@ class Awair implements ICronHandler {
       const ts = deviceToLastIngest[deviceId(d)];
       if (!ts) {
         log.warning(
-          `awair: no start time for ${deviceId(d)}, defaulting to 24 hours ago`
+          `awair: no start time for ${deviceId(d)}, defaulting to 24 hours ago`,
         );
       }
       const start = new Date(
-        ts ? ts.getTime() + 1000 : Date.now() - 1000 * 60 * 60 * 24
+        ts ? ts.getTime() + 1000 : Date.now() - 1000 * 60 * 60 * 24,
       );
       const { data } = await getRawData(this.token, d, start);
 
@@ -128,7 +141,7 @@ class Awair implements ICronHandler {
       await sendEvents(events);
 
       log.info(
-        `awair: ingested ${events.length} events starting from ${start}`
+        `awair: ingested ${events.length} events starting from ${start}`,
       );
     }
   }
