@@ -60,6 +60,7 @@ export const postEvents: Middleware = async ({ request, response }) => {
   events.forEach((evt) => {
     const { source, event, type, data } = evt;
     if (!source) {
+      console.log(JSON.stringify(evt, null, 2));
       response.status = 400;
       response.body = "missing data";
       return;
@@ -68,6 +69,8 @@ export const postEvents: Middleware = async ({ request, response }) => {
     const { major, minor } = source;
 
     if (!major || !minor || !type || !data || !event) {
+      console.log(JSON.stringify(evt, null, 2));
+
       response.status = 400;
       response.body = "missing data";
       return;
