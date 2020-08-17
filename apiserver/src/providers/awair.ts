@@ -43,7 +43,8 @@ async function getRawData(
   );
 
   if (
-    result.data.length === 0 && end.getTime() - start.getTime() > 1000 * 60 * 60
+    result.data && result.data.length === 0 &&
+    end.getTime() - start.getTime() > 1000 * 60 * 60
   ) {
     return getRawData(
       token,
