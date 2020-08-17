@@ -1,5 +1,5 @@
-import { oakCors } from "https://deno.land/x/cors/mod.ts";
-import { Router } from "https://deno.land/x/oak@v5.2.0/mod.ts";
+import { oakCors } from "./deps.ts";
+import { Router } from "./deps.ts";
 
 import { postEvents, getEvents } from "./api.ts";
 import { authMiddleware } from "./middlewares.ts";

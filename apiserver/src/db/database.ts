@@ -1,5 +1,5 @@
-import { config } from "https://deno.land/x/dotenv/mod.ts";
-import { Pool } from "https://deno.land/x/postgres@v0.4.1/mod.ts";
+import { config } from "../deps.ts";
+import { Pool } from "../deps.ts";
 
 import { AggregatedEvent, DBEvent, Event } from "../types.ts";
 

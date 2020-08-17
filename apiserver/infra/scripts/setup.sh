@@ -13,7 +13,7 @@ export DENO_INSTALL="~/.deno"
 export PATH="$DENO_INSTALL/bin:$PATH"
 
 # install denon
-deno install --allow-read --allow-run --allow-write -f --unstable https://deno.land/x/denon/denon.ts
+deno install --allow-read --allow-run --allow-write --allow-net -f -q --unstable https://deno.land/x/denon@2.3.2/denon.ts
 
 # git
 git clone https://github.com/jchen1/api

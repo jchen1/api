@@ -1,4 +1,4 @@
-import * as log from "https://deno.land/std/log/mod.ts";
+import * as log from "./deps.ts";
 
 import db, { fromDB } from "./db/database.ts";
 import wss from "./websocket.ts";
@@ -187,7 +187,7 @@ export function maskEvents(events: Event[]) {
   return events.map((event) => ({
     ...event,
     data: filters.events.includes(event.event) ||
-      filters.sources.includes(event.source.major)
+        filters.sources.includes(event.source.major)
       ? "hidden"
       : event.data,
   }));

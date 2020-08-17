@@ -1,5 +1,5 @@
-import * as log from "https://deno.land/std/log/mod.ts";
-import { Cron } from "https://deno.land/x/crontab/cron.ts";
+import * as log from "./deps.ts";
+import { Cron } from "./deps.ts";
 
 import awair from "./providers/awair.ts";
 import github from "./providers/github.ts";

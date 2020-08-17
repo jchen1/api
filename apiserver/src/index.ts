@@ -1,10 +1,10 @@
-import { config } from "https://deno.land/x/dotenv/mod.ts";
+import { config } from "./deps.ts";
 import {
   Application,
   Middleware,
   send,
-} from "https://deno.land/x/oak@v5.2.0/mod.ts";
-import * as log from "https://deno.land/std/log/mod.ts";
+} from "./deps.ts";
+import * as log from "./deps.ts";
 
 import cron from "./cron.ts";
 import db from "./db/database.ts";

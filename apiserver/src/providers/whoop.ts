@@ -1,5 +1,5 @@
-import { config } from "https://deno.land/x/dotenv/mod.ts";
-import * as log from "https://deno.land/std/log/mod.ts";
+import { config } from "../deps.ts";
+import * as log from "../deps.ts";
 
 import db from "../db/database.ts";
 import { sendEvents } from "../event.ts";
@@ -31,7 +31,7 @@ async function getToken(username: string, password: string) {
       password,
     }),
   })
-    .then(res => res.json())
+    .then((res) => res.json())
     .then(({ user, access_token, expires_in }) => {
       return {
         user_id: user.id,
@@ -47,20 +47,20 @@ async function api(token: Token, url: string) {
     headers: {
       Authorization: `Bearer ${token.access_token}`,
     },
-  }).then(res => res.json());
+  }).then((res) => res.json());
 }
 
 async function getCycles(token: Token, start: Date, end = new Date()) {
   return api(
     token,
-    `cycles?start=${start.toISOString()}&end=${end.toISOString()}`
+    `cycles?start=${start.toISOString()}&end=${end.toISOString()}`,
   );
 }
 
 async function getHR(token: Token, start: Date, end = new Date(), step = 6) {
   return api(
     token,
-    `metrics/heart_rate?start=${start.toISOString()}&end=${end.toISOString()}&order=t&step=${step}`
+    `metrics/heart_rate?start=${start.toISOString()}&end=${end.toISOString()}&order=t&step=${step}`,
   );
 }
 
@@ -68,13 +68,12 @@ async function getHREvents(token: Token, now: Date): Promise<Event[]> {
   const { rows } = await db.query(
     `SELECT ts FROM events WHERE event=$1 AND source_major=$2 ORDER BY ts DESC LIMIT 1;`,
     "hr",
-    "whoop"
+    "whoop",
   );
 
-  const start =
-    rows.length > 0
-      ? new Date(rows[0][0].getTime() + 1000)
-      : new Date(now.getTime() - 1000 * 60 * 60 * 24);
+  const start = rows.length > 0
+    ? new Date(rows[0][0].getTime() + 1000)
+    : new Date(now.getTime() - 1000 * 60 * 60 * 24);
 
   const { values } = await getHR(token, start);
   const events = values.map((metric: any) => ({
@@ -93,24 +92,25 @@ async function getCycleEvents(token: Token, now: Date): Promise<Event[]> {
     `SELECT ts FROM EVENTS WHERE event=$1 AND source_major=$2 ORDER BY ts DESC LIMIT 1;`,
     // doesn't really matter: we only import when all states are `complete`
     "strain",
-    "whoop"
+    "whoop",
   );
 
-  const start =
-    rows.length > 0
-      ? new Date(rows[0][0].getTime() + 1000)
-      : new Date(now.getTime() - 1000 * 60 * 60 * 24 * 14);
+  const start = rows.length > 0
+    ? new Date(rows[0][0].getTime() + 1000)
+    : new Date(now.getTime() - 1000 * 60 * 60 * 24 * 14);
   const cycles = await getCycles(token, start);
 
   const events = cycles.flatMap((cycle: any) => {
     const { days, during, recovery, sleep, strain } = cycle;
     if (days.length !== 1) {
       log.warning(
-        `whoop: cycle with more than one day, ignoring...\n${JSON.stringify(
-          cycle,
-          null,
-          2
-        )}`
+        `whoop: cycle with more than one day, ignoring...\n${
+          JSON.stringify(
+            cycle,
+            null,
+            2,
+          )
+        }`,
       );
       return [];
     }
@@ -121,11 +121,11 @@ async function getCycleEvents(token: Token, now: Date): Promise<Event[]> {
     }
 
     const eventDay = new Date(
-      new Date(days[0]).getTime() + new Date().getTimezoneOffset() * 60 * 1000
+      new Date(days[0]).getTime() + new Date().getTimezoneOffset() * 60 * 1000,
     );
-    const states = [recovery, strain, sleep].map(x => get(x, "state"));
+    const states = [recovery, strain, sleep].map((x) => get(x, "state"));
     if (
-      !states.every(s => s === "complete") ||
+      !states.every((s) => s === "complete") ||
       eventDay.toDateString() === new Date().toDateString()
     ) {
       log.info(`whoop: ignoring incomplete cycle for date ${eventDay}`);
@@ -148,7 +148,7 @@ async function getCycleEvents(token: Token, now: Date): Promise<Event[]> {
         type: EventType.Int,
         data: recovery.score,
       },
-    ].map(e => ({ time: new Date(recovery.timestamp), ...e }));
+    ].map((e) => ({ time: new Date(recovery.timestamp), ...e }));
 
     // potential todo: individual sleeps (sleep.sleeps)
     const sleepEvents = [
@@ -175,15 +175,14 @@ async function getCycleEvents(token: Token, now: Date): Promise<Event[]> {
         type: EventType.Json,
         data: {
           strain: workout.score,
-          duration:
-            new Date(workout.during.upper).getTime() -
+          duration: new Date(workout.during.upper).getTime() -
             new Date(workout.during.lower).getTime(),
           averageHeartRate: workout.averageHeartRate,
           sportId: workout.sportId,
           sport: get(sportIdToName, `${workout.sportId}`, "Other"),
         },
         time: new Date(workout.during.lower),
-      }))
+      })),
     );
 
     const events = (recoveryEvents as any).concat(sleepEvents, strainEvents);
@@ -245,7 +244,7 @@ class Whoop implements ICronHandler {
       log.info(
         `whoop: ingested ${events.length} events starting from ${
           events.sort((a, b) => a.time.getTime() - b.time.getTime())[0].time
-        }`
+        }`,
       );
     } else {
       log.info(`whoop: ingested 0 events`);

@@ -1,5 +1,5 @@
-import { config } from "https://deno.land/x/dotenv/mod.ts";
-import { Middleware, Router } from "https://deno.land/x/oak@v5.2.0/mod.ts";
+import { config } from "./deps.ts";
+import { Middleware, Router } from "./deps.ts";
 
 export const authMiddleware: Middleware = ({ request, response }, next) => {
   if (!config().AUTH_TOKEN) {

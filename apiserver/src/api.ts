@@ -1,5 +1,5 @@
-import * as log from "https://deno.land/std/log/mod.ts";
-import { Middleware, helpers } from "https://deno.land/x/oak@v5.2.0/mod.ts";
+import * as log from "./deps.ts";
+import { Middleware, helpers } from "./deps.ts";
 
 import { historicalEvents, sendEvents, maskEvents } from "./event.ts";
 import { EventsQueryOpts, EventType, QueryPeriodType } from "./types.ts";
