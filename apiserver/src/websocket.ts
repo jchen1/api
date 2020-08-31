@@ -67,6 +67,10 @@ class WSSServer {
           log.error(err);
         }
       });
+
+      ws.on("error", (err: Error) => {
+        log.error(err);
+      });
     });
 
     log.info(`Started wss server on port ${wsPort}`);

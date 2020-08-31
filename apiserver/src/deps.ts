@@ -5,8 +5,7 @@ export * from "https://deno.land/x/dotenv@v0.5.0/mod.ts";
 
 export * from "https://deno.land/x/crontab@0.1.1-1/cron.ts";
 
-// deno-websocket doesn't have a tagged release on deno.land yet
-export * from "https://raw.githubusercontent.com/ryo-ma/deno-websocket/839d84351dead001fd898dce4eeead79391a4d61/mod.ts";
+export * from "https://deno.land/x/websocket@v0.0.3/mod.ts";
 
 // same with cors
 export * from "https://raw.githubusercontent.com/tajpouria/cors/a6ba8039deb0093807476ff0c889943b273823ae/mod.ts";
