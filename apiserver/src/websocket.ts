@@ -69,7 +69,7 @@ class WSSServer {
       });
 
       ws.on("error", (err: Error) => {
-        log.error(err);
+        log.error(`wss error: ${err.message}`);
       });
     });
 
