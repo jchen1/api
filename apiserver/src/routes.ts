@@ -14,6 +14,10 @@ router
     response.status = 301;
     response.headers.set("Location", "https://jeffchen.dev/metrics");
   })
+  .get("/health", oakCors(), ({ response }) => {
+    response.status = 200;
+    response.body = "ok";
+  })
   .post("/", oakCors(), authMiddleware, postEvents);
 
 export default router;
