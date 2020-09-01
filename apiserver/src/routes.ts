@@ -14,7 +14,7 @@ router
     response.status = 301;
     response.headers.set("Location", "https://jeffchen.dev/metrics");
   })
-  .get("/health", oakCors(), ({ response }) => {
+  .get("/healthcheck", oakCors(), ({ response }) => {
     response.status = 200;
     response.body = "ok";
   })

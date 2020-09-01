@@ -1,0 +1,17 @@
+[Unit]
+Description=ApiServer
+Documentation=https://github.com/jchen1/api
+After=docker.service
+Requires=docker.service
+
+[Service]
+Environment=HOME=/root
+WorkingDirectory=/root/api
+ExecStart=docker run -it --volume $PWD/apiserver:/app --volume $PWD/.env:/app/.env --workdir /app -p 9000:9000 -p 9001:9001 jeffchen94/api:latest
+Restart=always
+RuntimeMaxSec=86400
+LimitNOFILE=1048576
+LimitNPROC=1048576
+
+[Install]
+WantedBy=multi-user.target

@@ -7,6 +7,8 @@ WORKDIR /app
 
 USER deno
 
+HEALTHCHECK --interval=5s --timeout=30s --retries=2 CMD curl --fail http://localhost:9000/healthcheck || exit 1
+
 # Cache the dependencies as a layer (the following two steps are re-run only when deps.ts is modified).
 # Ideally cache deps.ts will download and compile _all_ external files used in main.ts.
 COPY src/deps.ts src/deps.ts
