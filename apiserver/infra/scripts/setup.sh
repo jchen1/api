@@ -26,10 +26,9 @@ deno install --allow-read --allow-run --allow-write --allow-net -f -q --unstable
 # softlink services
 rm /etc/nginx/nginx.conf
 
-ln -s apiserver/infra/nginx.conf /etc/nginx/nginx.conf
-
-ln -s apiserver/infra/docker.service /etc/systemd/system/docker.service
-ln -s apiserver/infra/apiserver.service /etc/systemd/system/apiserver.service
+ln -s $PWD/apiserver/infra/nginx.conf /etc/nginx/nginx.conf
+ln -s $PWD/apiserver/infra/docker.service /etc/systemd/system/docker.service
+ln -s $PWD/apiserver/infra/apiserver.service /etc/systemd/system/apiserver.service
 
 systemctl daemon-reload
 systemctl enable docker.service
