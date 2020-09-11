@@ -4,7 +4,7 @@ a simple api for logging events
 
 ## todo
 
-- [ ] auto certbot renew
+- [x] auto certbot renew
 - [ ] test reprovisioning a server
 - [ ] database backups?
 - [ ] auto database setup & migrations
