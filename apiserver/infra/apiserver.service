@@ -7,7 +7,7 @@ Requires=docker.service
 [Service]
 Environment=HOME=/root
 WorkingDirectory=/root/api
-ExecStart=docker run --volume /root/api/apiserver:/app --volume /root/api/.env:/app/.env --workdir /app -p 9000:9000 -p 9001:9001 jeffchen94/api:latest
+ExecStart=docker run --net=host --volume /root/api/apiserver:/app --volume /root/api/.env:/app/.env --workdir /app jeffchen94/api:latest
 Restart=always
 RuntimeMaxSec=86400
 LimitNOFILE=1048576
