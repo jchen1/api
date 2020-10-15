@@ -75,7 +75,9 @@ async function getHREvents(token: Token, now: Date): Promise<Event[]> {
     ? new Date(rows[0][0].getTime() + 1000)
     : new Date(now.getTime() - 1000 * 60 * 60 * 24);
 
-  const { values } = await getHR(token, start);
+  const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 7);
+
+  const { values } = await getHR(token, start, end.getTime() < now.getTime() ? end : now);
   const events = values.map((metric: any) => ({
     event: "hr",
     source: { major: "whoop", minor: "api" },
@@ -98,7 +100,9 @@ async function getCycleEvents(token: Token, now: Date): Promise<Event[]> {
   const start = rows.length > 0
     ? new Date(rows[0][0].getTime() + 1000)
     : new Date(now.getTime() - 1000 * 60 * 60 * 24 * 14);
-  const cycles = await getCycles(token, start);
+
+  const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 7);
+  const cycles = await getCycles(token, start, end.getTime() < now.getTime() ? end : now);
 
   const events = cycles.flatMap((cycle: any) => {
     const { days, during, recovery, sleep, strain } = cycle;
