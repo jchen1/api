@@ -78,7 +78,7 @@ class WSSServer {
 
   async sendEvents(events: Event[]) {
     return Promise.allSettled(
-      Object.values(this.connections).map(({ ws, eventFilter }) => {
+      Object.values(this.connections).map(async ({ ws, eventFilter }) => {
         const eventsToSend = maskEvents(events).filter(({ event }) =>
           eventFilter === "all" || eventFilter.includes(event)
         );
