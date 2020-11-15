@@ -22,6 +22,7 @@ deno install --allow-read --allow-run --allow-write --allow-net -f -q --unstable
 # su - postgres
 # createdb api
 # run migrations...
+# CREATE USER readonly WITH PASSWORD ....;
 
 # softlink services
 rm /etc/nginx/nginx.conf
@@ -29,6 +30,12 @@ rm /etc/nginx/nginx.conf
 ln -s $PWD/apiserver/infra/nginx.conf /etc/nginx/nginx.conf
 ln -s $PWD/apiserver/infra/docker.service /etc/systemd/system/docker.service
 ln -s $PWD/apiserver/infra/apiserver.service /etc/systemd/system/apiserver.service
+
+# postgres config
+mv /etc/postgresql/12/main/pg_hba.conf /etc/postgresql/12/main/pg_hba.conf
+
+ln -s $PWD/apiserver/infra/postgresql.conf /etc/postgresql/12/main/conf.d/postgresql.conf
+ln -s $PWD/apiserver/infra/pg_hba.conf /etc/postgresql/12/main/pg_hba.conf
 
 systemctl daemon-reload
 systemctl enable docker.service
