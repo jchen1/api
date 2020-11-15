@@ -3,14 +3,15 @@ Description=ApiServer
 Documentation=https://github.com/jchen1/api
 After=docker.service
 Requires=docker.service
+StartLimitIntervalSec=0
 
 [Service]
 Environment=HOME=/root
 WorkingDirectory=/root/api
 ExecStart=docker run --net=host --volume /root/api/apiserver:/app --volume /root/api/.env:/app/.env --workdir /app jeffchen94/api:latest
+ExecStop=docker stop $(docker ps -q --filter ancestor=jeffchen94/api)
 Restart=always
 RestartSec=5
-StartLimitIntervalSec=0
 RuntimeMaxSec=86400
 LimitNOFILE=1048576
 LimitNPROC=1048576
