@@ -32,10 +32,13 @@ ln -s $PWD/apiserver/infra/docker.service /etc/systemd/system/docker.service
 ln -s $PWD/apiserver/infra/apiserver.service /etc/systemd/system/apiserver.service
 
 # postgres config
-mv /etc/postgresql/12/main/pg_hba.conf /etc/postgresql/12/main/pg_hba.conf
+mv /etc/postgresql/12/main/pg_hba.conf /etc/postgresql/12/main/pg_hba.conf.bak
 
-ln -s $PWD/apiserver/infra/postgresql.conf /etc/postgresql/12/main/conf.d/postgresql.conf
-ln -s $PWD/apiserver/infra/pg_hba.conf /etc/postgresql/12/main/pg_hba.conf
+cp $PWD/apiserver/infra/postgresql.conf /etc/postgresql/12/main/conf.d/postgresql.conf
+cp $PWD/apiserver/infra/pg_hba.conf /etc/postgresql/12/main/pg_hba.conf
+
+chown -h postgres:postgres /etc/postgresql/12/main/conf.d/postgresql.conf
+chown -h postgres:postgres /etc/postgresql/12/main/pg_hba.conf
 
 systemctl daemon-reload
 systemctl enable docker.service
