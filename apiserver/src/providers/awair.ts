@@ -98,12 +98,12 @@ class Awair implements ICronHandler {
       log.warning("awair: no devices");
     }
 
-    const { rows } = await db.client.queryArray(
+    const { rows } = await db.client.queryArray<[string, Date]>(
       `SELECT source_minor, MAX(ts) FROM events WHERE source_major=$1 AND source_minor = ANY($2::text[]) GROUP BY source_minor;`,
       ["awair", this.devices.map(deviceId)],
     );
 
-    const deviceToLastIngest = rows.reduce((acc, row) => {
+    const deviceToLastIngest = rows.reduce((acc: Record<string, Date>, row) => {
       acc[row[0]] = row[1];
       return acc;
     }, {});

@@ -65,7 +65,7 @@ async function getHR(token: Token, start: Date, end = new Date(), step = 6) {
 }
 
 async function getHREvents(token: Token, now: Date): Promise<Event[]> {
-  const { rows } = await db.client.queryArray(
+  const { rows } = await db.client.queryArray<[Date]>(
     `SELECT ts FROM events WHERE event=$1 AND source_major=$2 ORDER BY ts DESC LIMIT 1;`,
     ["hr", "whoop"]
   );
@@ -89,7 +89,7 @@ async function getHREvents(token: Token, now: Date): Promise<Event[]> {
 }
 
 async function getCycleEvents(token: Token, now: Date): Promise<Event[]> {
-  const { rows } = await db.client.queryArray(
+  const { rows } = await db.client.queryArray<[Date]>(
     `SELECT ts FROM EVENTS WHERE event=$1 AND source_major=$2 ORDER BY ts DESC LIMIT 1;`,
     // doesn't really matter: we only import when all states are `complete`
     ["strain", "whoop"]

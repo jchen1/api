@@ -140,7 +140,7 @@ GROUP BY event, period
 ORDER BY period ASC
 LIMIT $3;`;
 
-  const { rows } = await db.client.queryArray(
+  const { rows } = await db.client.queryArray<[Date, string, string, string, EventType, bigint, number, bigint, number, string, any]>(
     query,
     [start, end, limit],
   );

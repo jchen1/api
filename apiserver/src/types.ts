@@ -29,9 +29,9 @@ export type DBEvent = {
   source_minor: string;
   type: EventType;
   ts: Date;
-  count?: number;
+  count?: bigint;
   data_int?: number;
-  data_bigint?: number;
+  data_bigint?: bigint;
   data_real?: number;
   data_text?: string;
   data_json?: any;
