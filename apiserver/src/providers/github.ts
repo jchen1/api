@@ -7,7 +7,7 @@ import { ICronHandler, EventType, Event } from "../types.ts";
 // https://gist.github.com/niallo/3109252#gistcomment-2883309
 function parseLinkHeader(header: string | null) {
   if (!header || header.length === 0) {
-    throw new Error("input must not be of zero length");
+    return {};
   }
 
   // Split parts by comma and parse each part into a named link
@@ -119,7 +119,7 @@ async function getEvents(
       `github: failed to fetch ${result.status} ${result.text()}`,
     );
   }
-
+  
   const links = parseLinkHeader(result.headers.get("Link"));
   const body = await result.json();
   const events: Event[] = body.map((event: any) => ({
