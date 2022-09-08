@@ -2,7 +2,7 @@ import { config } from "../deps.ts";
 import * as log from "../deps.ts";
 
 import { sendEvents } from "../event.ts";
-import { ICronHandler, EventType, Event } from "../types.ts";
+import { Event, EventType, ICronHandler } from "../types.ts";
 
 type LeagueData = {
   league: number;
@@ -27,9 +27,10 @@ type LeagueData = {
   id: number;
 };
 
-type StoredData = Omit<LeagueData, 'league' | 'tier' | 'race0' | 'id' | 'version'> 
-    & Partial<Pick<LeagueData, | 'tier' | 'race0' | 'id' | 'version'>> 
-    & { league: string, time: Date, race: string };
+type StoredData =
+  & Omit<LeagueData, "league" | "tier" | "race0" | "id" | "version">
+  & Partial<Pick<LeagueData, "tier" | "race0" | "id" | "version">>
+  & { league: string; time: Date; race: string };
 
 const races = ["Zerg", "Protoss", "Terran"];
 const leagues = [

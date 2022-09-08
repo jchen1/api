@@ -1,12 +1,9 @@
 import { config } from "./deps.ts";
 import * as log from "./deps.ts";
 
-import {
-  WebSocket,
-  WebSocketServer,
-} from "./deps.ts";
+import { WebSocket, WebSocketServer } from "./deps.ts";
 
-import { historicalEvents, sendEvent, maskEvents } from "./event.ts";
+import { historicalEvents, maskEvents, sendEvent } from "./event.ts";
 import { Event, EventType } from "./types.ts";
 
 type WSConnection = {

@@ -1,7 +1,7 @@
 import { oakCors } from "./deps.ts";
 import { Router } from "./deps.ts";
 
-import { postEvents, getEvents } from "./api.ts";
+import { getEvents, postEvents } from "./api.ts";
 import { authMiddleware } from "./middlewares.ts";
 
 const router = new Router();

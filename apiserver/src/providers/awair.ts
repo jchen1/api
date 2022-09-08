@@ -3,7 +3,7 @@ import * as log from "../deps.ts";
 
 import db from "../db/database.ts";
 import { sendEvents } from "../event.ts";
-import { ICronHandler, EventType, Event } from "../types.ts";
+import { Event, EventType, ICronHandler } from "../types.ts";
 
 type Device = {
   type: string;

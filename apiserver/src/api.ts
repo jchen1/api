@@ -1,7 +1,7 @@
 import * as log from "./deps.ts";
-import { Middleware, helpers } from "./deps.ts";
+import { helpers, Middleware } from "./deps.ts";
 
-import { historicalEvents, sendEvents, maskEvents } from "./event.ts";
+import { historicalEvents, maskEvents, sendEvents } from "./event.ts";
 import { EventsQueryOpts, EventType, QueryPeriodType } from "./types.ts";
 
 export const getEvents: Middleware = async (context) => {

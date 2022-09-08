@@ -2,7 +2,7 @@ import { config } from "../deps.ts";
 import * as log from "../deps.ts";
 
 import { sendEvents } from "../event.ts";
-import { ICronHandler, EventType, Event } from "../types.ts";
+import { Event, EventType, ICronHandler } from "../types.ts";
 
 // https://gist.github.com/niallo/3109252#gistcomment-2883309
 function parseLinkHeader(header: string | null) {
@@ -119,7 +119,7 @@ async function getEvents(
       `github: failed to fetch ${result.status} ${result.text()}`,
     );
   }
-  
+
   const links = parseLinkHeader(result.headers.get("Link"));
   const body = await result.json();
   const events: Event[] = body.map((event: any) => ({

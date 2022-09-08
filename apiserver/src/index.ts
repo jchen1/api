@@ -1,10 +1,6 @@
 import { oakCors } from "./deps.ts";
 import { config } from "./deps.ts";
-import {
-  Application,
-  Middleware,
-  send,
-} from "./deps.ts";
+import { Application, Middleware, send } from "./deps.ts";
 import * as log from "./deps.ts";
 
 import cron from "./cron.ts";

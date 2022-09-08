@@ -2,7 +2,7 @@ import * as log from "./deps.ts";
 
 import db, { fromDB } from "./db/database.ts";
 import wss from "./websocket.ts";
-import { Event, EventSource, EventType, EventsQueryOpts } from "./types.ts";
+import { Event, EventSource, EventsQueryOpts, EventType } from "./types.ts";
 
 export async function sendEvents(events: Event[]) {
   if (events.length === 0) {
@@ -140,7 +140,21 @@ GROUP BY event, period
 ORDER BY period ASC
 LIMIT $3;`;
 
-  const { rows } = await db.client.queryArray<[Date, string, string, string, EventType, bigint, number, bigint, number, string, any]>(
+  const { rows } = await db.client.queryArray<
+    [
+      Date,
+      string,
+      string,
+      string,
+      EventType,
+      bigint,
+      number,
+      bigint,
+      number,
+      string,
+      any,
+    ]
+  >(
     query,
     [start, end, limit],
   );

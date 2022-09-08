@@ -23,21 +23,21 @@ class Database {
       },
       50,
     );
-    
-    this.pool.connect().then(result => {
+
+    this.pool.connect().then((result) => {
       this._client = result;
     });
   }
-  
+
   async connect(): Promise<void> {
     if (this._client === undefined) {
       this._client = await this.pool.connect();
     }
   }
-  
+
   get client(): PoolClient {
     if (this._client === undefined) {
-      throw new Error('client not initialized');
+      throw new Error("client not initialized");
     }
     return this._client;
   }
