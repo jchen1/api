@@ -1,4 +1,4 @@
-FROM hayd/alpine-deno:1.3.0
+FROM denoland/deno:alpine:1.25.2
 
 # 9000 for webserver, 9001 for websocket
 EXPOSE 9000 9001
