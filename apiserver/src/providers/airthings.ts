@@ -1,7 +1,6 @@
 import { config } from "../deps.ts";
 import * as log from "../deps.ts";
 
-import db from "../db/database.ts";
 import { sendEvents } from "../event.ts";
 import { Event, EventType, ICronHandler } from "../types.ts";
 

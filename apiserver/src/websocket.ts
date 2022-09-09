@@ -1,13 +1,13 @@
 import { config } from "./deps.ts";
 import * as log from "./deps.ts";
 
-import { WebSocket, WebSocketServer } from "./deps.ts";
+import { WebSocketClient, WebSocketServer } from "./deps.ts";
 
-import { historicalEvents, maskEvents, sendEvent } from "./event.ts";
+import { maskEvents, sendEvent } from "./event.ts";
 import { Event, EventType } from "./types.ts";
 
 type WSConnection = {
-  ws: WebSocket;
+  ws: WebSocketClient;
   eventFilter: string[] | "all";
 };
 
@@ -24,7 +24,7 @@ class WSSServer {
     this.wss = new WebSocketServer(wsPort);
     this.connections = {};
 
-    this.wss.on("connection", async (ws: WebSocket) => {
+    this.wss.on("connection", (ws: WebSocketClient) => {
       const now = String(Date.now());
       this.connections[now] = { ws, eventFilter: "all" };
       log.info(
@@ -53,7 +53,7 @@ class WSSServer {
           } else if (parsed.type === "reconnect") {
             // meh
           } else if (parsed.type === "message") {
-            sendEvent(
+            await sendEvent(
               "user_msg",
               { major: "wss", minor: now },
               EventType.Text,
