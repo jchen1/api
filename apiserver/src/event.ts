@@ -2,7 +2,7 @@ import * as log from "./deps.ts";
 
 import db, { fromDB } from "./db/database.ts";
 import wss from "./websocket.ts";
-import { Event, EventSource, EventType, EventsQueryOpts } from "./types.ts";
+import { Event, EventSource, EventsQueryOpts, EventType } from "./types.ts";
 
 export async function sendEvents(events: Event[]) {
   if (events.length === 0) {
@@ -35,7 +35,7 @@ export async function sendEvents(events: Event[]) {
       .join(",") +
     " ON CONFLICT DO NOTHING;";
 
-  const promise = db.query({
+  const promise = db.client.queryArray({
     text: query,
     args: typedEvents.flatMap((e) => [
       e.time,
@@ -100,7 +100,7 @@ export async function historicalEvents(
     : "";
 
   const query = `
-  WITH
+WITH
   events_with_period AS
     (SELECT 
       DATE_TRUNC('${period}', ts) as period, 
@@ -140,11 +140,23 @@ GROUP BY event, period
 ORDER BY period ASC
 LIMIT $3;`;
 
-  const { rows } = await db.query(
+  const { rows } = await db.client.queryArray<
+    [
+      Date,
+      string,
+      string,
+      string,
+      EventType,
+      bigint,
+      number,
+      bigint,
+      number,
+      string,
+      any,
+    ]
+  >(
     query,
-    start,
-    end,
-    limit,
+    [start, end, limit],
   );
 
   return rows

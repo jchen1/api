@@ -3,7 +3,7 @@ import * as log from "../deps.ts";
 
 import db from "../db/database.ts";
 import { sendEvents } from "../event.ts";
-import { ICronHandler, EventType, Event } from "../types.ts";
+import { Event, EventType, ICronHandler } from "../types.ts";
 
 type Device = {
   type: string;
@@ -98,13 +98,12 @@ class Awair implements ICronHandler {
       log.warning("awair: no devices");
     }
 
-    const { rows } = await db.query(
+    const { rows } = await db.client.queryArray<[string, Date]>(
       `SELECT source_minor, MAX(ts) FROM events WHERE source_major=$1 AND source_minor = ANY($2::text[]) GROUP BY source_minor;`,
-      "awair",
-      this.devices.map(deviceId),
+      ["awair", this.devices.map(deviceId)],
     );
 
-    const deviceToLastIngest = rows.reduce((acc, row) => {
+    const deviceToLastIngest = rows.reduce((acc: Record<string, Date>, row) => {
       acc[row[0]] = row[1];
       return acc;
     }, {});

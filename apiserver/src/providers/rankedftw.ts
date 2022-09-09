@@ -2,7 +2,7 @@ import { config } from "../deps.ts";
 import * as log from "../deps.ts";
 
 import { sendEvents } from "../event.ts";
-import { ICronHandler, EventType, Event } from "../types.ts";
+import { Event, EventType, ICronHandler } from "../types.ts";
 
 type LeagueData = {
   league: number;
@@ -26,6 +26,11 @@ type LeagueData = {
   ladder_count: number;
   id: number;
 };
+
+type StoredData =
+  & Omit<LeagueData, "league" | "tier" | "race0" | "id" | "version">
+  & Partial<Pick<LeagueData, "tier" | "race0" | "id" | "version">>
+  & { league: string; time: Date; race: string };
 
 const races = ["Zerg", "Protoss", "Terran"];
 const leagues = [
@@ -53,7 +58,7 @@ async function getTeamData(team: string) {
     const time = new Date(1000 * data.data_time);
     const race = races[data.race0];
 
-    const parsedData = { ...data, league, time, race };
+    const parsedData: StoredData = { ...data, league, time, race };
 
     delete parsedData.tier;
     delete parsedData.race0;

@@ -3,7 +3,7 @@ import * as log from "../deps.ts";
 
 import db from "../db/database.ts";
 import { sendEvents } from "../event.ts";
-import { ICronHandler, EventType, Event } from "../types.ts";
+import { Event, EventType, ICronHandler } from "../types.ts";
 import { get } from "../util.ts";
 
 type Token = {
@@ -65,10 +65,9 @@ async function getHR(token: Token, start: Date, end = new Date(), step = 6) {
 }
 
 async function getHREvents(token: Token, now: Date): Promise<Event[]> {
-  const { rows } = await db.query(
+  const { rows } = await db.client.queryArray<[Date]>(
     `SELECT ts FROM events WHERE event=$1 AND source_major=$2 ORDER BY ts DESC LIMIT 1;`,
-    "hr",
-    "whoop",
+    ["hr", "whoop"],
   );
 
   const start = rows.length > 0
@@ -77,7 +76,11 @@ async function getHREvents(token: Token, now: Date): Promise<Event[]> {
 
   const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 7);
 
-  const { values } = await getHR(token, start, end.getTime() < now.getTime() ? end : now);
+  const { values } = await getHR(
+    token,
+    start,
+    end.getTime() < now.getTime() ? end : now,
+  );
   const events = values.map((metric: any) => ({
     event: "hr",
     source: { major: "whoop", minor: "api" },
@@ -90,11 +93,10 @@ async function getHREvents(token: Token, now: Date): Promise<Event[]> {
 }
 
 async function getCycleEvents(token: Token, now: Date): Promise<Event[]> {
-  const { rows } = await db.query(
+  const { rows } = await db.client.queryArray<[Date]>(
     `SELECT ts FROM EVENTS WHERE event=$1 AND source_major=$2 ORDER BY ts DESC LIMIT 1;`,
     // doesn't really matter: we only import when all states are `complete`
-    "strain",
-    "whoop",
+    ["strain", "whoop"],
   );
 
   const start = rows.length > 0
@@ -102,7 +104,11 @@ async function getCycleEvents(token: Token, now: Date): Promise<Event[]> {
     : new Date(now.getTime() - 1000 * 60 * 60 * 24 * 14);
 
   const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 7);
-  const cycles = await getCycles(token, start, end.getTime() < now.getTime() ? end : now);
+  const cycles = await getCycles(
+    token,
+    start,
+    end.getTime() < now.getTime() ? end : now,
+  );
 
   const events = cycles.flatMap((cycle: any) => {
     const { days, during, recovery, sleep, strain } = cycle;

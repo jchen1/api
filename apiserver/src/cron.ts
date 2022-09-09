@@ -1,6 +1,7 @@
 import * as log from "./deps.ts";
 import { Cron } from "./deps.ts";
 
+import airthings from "./providers/airthings.ts";
 import awair from "./providers/awair.ts";
 import github from "./providers/github.ts";
 import rankedftw from "./providers/rankedftw.ts";
@@ -15,6 +16,7 @@ const jobs: Record<string, ICronHandler> = {
   github,
   rankedftw,
   whoop,
+  airthings,
 };
 
 async function run(name: string) {
