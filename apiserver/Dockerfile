@@ -1,4 +1,6 @@
-FROM denoland/deno:alpine:1.25.2
+FROM denoland/deno:alpine-1.25.2
+
+RUN apk add --no-cache curl
 
 # 9000 for webserver, 9001 for websocket
 EXPOSE 9000 9001

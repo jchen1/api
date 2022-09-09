@@ -14,4 +14,10 @@ start:
 	PATH=~/.deno/bin:$$PATH denon run --allow-read --allow-env --allow-net apiserver/src/index.ts
 	
 prod:
-	git pull && systemctl daemon-reload && systemctl restart apiserver.service && journalctl -u apiserver.service -f
+	git pull && docker pull jeffchen94/api:latest && systemctl daemon-reload && systemctl restart apiserver.service && journalctl -u apiserver.service -f
+
+build:
+	docker build apiserver -t jeffchen94/api
+
+build_and_push: build
+	docker push jeffchen94/api:latest
