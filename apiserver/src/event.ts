@@ -93,6 +93,7 @@ export async function historicalEvents(
 ) {
   const limit = opts.limit || 20000;
   const period = opts.period || "minute";
+  // todo: escape this sql
   const include = (opts.include || []).filter((s) => s !== "");
 
   const includeQuery = include.length > 0
@@ -182,7 +183,8 @@ LIMIT $3;`;
         count,
         data_int,
         data_bigint,
-        data_real,
+        // deno-postgres returns floats as strings. it's possible we lose some precision here, but we don't really care
+        data_real: Number(data_real),
         data_text,
         data_json,
       }),
