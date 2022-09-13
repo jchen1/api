@@ -36,7 +36,7 @@ type PartialEvent = Pick<Event, "event" | "type" | "data">;
 class WeatherKit implements ICronHandler {
   token?: string;
 
-  schedule = "*/5 * * * *";
+  schedule = "* * * * *";
 
   constructor() {
     this.token = config().WEATHERKIT_API_TOKEN;

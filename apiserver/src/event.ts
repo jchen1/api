@@ -123,12 +123,12 @@ WITH
       FIRST_VALUE(data_json) OVER w AS data_json
     FROM events_with_period
     WHERE period >= $1 AND period <= $2
-    WINDOW w AS (PARTITION BY event, period))
+    WINDOW w AS (PARTITION BY event, period, source_major, source_minor))
 SELECT
   period AS ts,
   event,
-  MIN(source_major) AS source_major,
-  MIN(source_minor) AS source_minor,
+  source_major,
+  source_minor,
   CAST(MIN(type) AS TEXT) as type,
   MIN(count) AS count,
   MIN(data_int) AS data_int,
@@ -137,7 +137,7 @@ SELECT
   FIRST(data_text) AS data_text,
   FIRST(data_json) AS data_json
 FROM events_by_period
-GROUP BY event, period
+GROUP BY event, period, source_major, source_minor
 ORDER BY period ASC
 LIMIT $3;`;
 
