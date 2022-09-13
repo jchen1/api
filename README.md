@@ -41,5 +41,5 @@ a simple api for logging events
 - [x] mood (firebase?)
 - [x] awair
 - [x] airthings
-- [ ] wunderground
+- [x] weatherkit 
 - [ ] ecobee

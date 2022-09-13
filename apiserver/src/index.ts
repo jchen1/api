@@ -55,7 +55,7 @@ const httpsOptions = config().ENABLE_HTTPS
 const server = app.listen({ port, ...httpsOptions });
 log.info(`Webserver started on port ${port}`);
 
-cron.start();
+void cron.start();
 log.info("Cron workers started");
 
 await server;

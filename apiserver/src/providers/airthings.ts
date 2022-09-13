@@ -3,6 +3,7 @@ import * as log from "../deps.ts";
 
 import { sendEvents } from "../event.ts";
 import { Event, EventType, ICronHandler } from "../types.ts";
+import { toFahrenheit } from "../util.ts";
 
 type Token = {
   access_token: string;
@@ -71,7 +72,7 @@ async function getCurrentData(
     event: "temp",
     source,
     type: EventType.Real,
-    data: (1.8 * data.temp) + 32, // received in celsius
+    data: toFahrenheit(data.temp),
     time: now,
   }, {
     event: "voc",

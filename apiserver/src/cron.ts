@@ -5,6 +5,7 @@ import airthings from "./providers/airthings.ts";
 import awair from "./providers/awair.ts";
 import github from "./providers/github.ts";
 import rankedftw from "./providers/rankedftw.ts";
+import weatherkit from "./providers/weatherkit.ts";
 import whoop from "./providers/whoop.ts";
 
 import { ICronHandler } from "./types.ts";
@@ -12,11 +13,12 @@ import { ICronHandler } from "./types.ts";
 const cron = new Cron();
 
 const jobs: Record<string, ICronHandler> = {
-  awair,
-  github,
-  rankedftw,
-  whoop,
-  airthings,
+  // airthings,
+  // awair,
+  // github,
+  // rankedftw,
+  weatherkit,
+  // whoop,
 };
 
 async function run(name: string) {
@@ -52,7 +54,7 @@ export async function start() {
   for (const name in jobs) {
     await run(name);
   }
-  cron.start();
+  return cron.start();
 }
 
 export default { start };
