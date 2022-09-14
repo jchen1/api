@@ -1,5 +1,5 @@
 import * as log from "./deps.ts";
-import { Cron } from "./deps.ts";
+import { config, Cron } from "./deps.ts";
 
 import airthings from "./providers/airthings.ts";
 import awair from "./providers/awair.ts";
@@ -36,7 +36,11 @@ async function run(name: string) {
   }
 }
 
-for (const name in jobs) {
+const enabledJobs = Object.keys(jobs).filter((job) =>
+  typeof config()[`${job.toUpperCase()}_DISABLED`] === "undefined"
+);
+
+for (const name of enabledJobs) {
   const worker = jobs[name];
   cron.add(worker.schedule, async () => {
     await run(name);
@@ -44,14 +48,14 @@ for (const name in jobs) {
 }
 
 async function init() {
-  for (const name in jobs) {
+  for (const name of enabledJobs) {
     await jobs[name].init();
   }
 }
 
 export async function start() {
   await init();
-  for (const name in jobs) {
+  for (const name of enabledJobs) {
     await run(name);
   }
   return cron.start();
