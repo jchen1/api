@@ -13,12 +13,12 @@ import { ICronHandler } from "./types.ts";
 const cron = new Cron();
 
 const jobs: Record<string, ICronHandler> = {
-  // airthings,
-  // awair,
-  // github,
-  // rankedftw,
+  airthings,
+  awair,
+  github,
+  rankedftw,
   weatherkit,
-  // whoop,
+  whoop,
 };
 
 async function run(name: string) {
